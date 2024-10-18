@@ -1,0 +1,14 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "y",
+        "x"
+    ],
+    "coordinates": "lon lat",
+    "grid_mapping": "crs",
+    "long_name": "Gridded estimates of hourly rainfall",
+    "standard_name": "rainfall_amount",
+    "units": "kg m-2",
+    "valid_max": 500.0,
+    "valid_min": 0.0
+}
