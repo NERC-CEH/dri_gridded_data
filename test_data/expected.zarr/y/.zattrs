@@ -1,0 +1,10 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "y"
+    ],
+    "bounds": "y_bnds",
+    "long_name": "northing - OSGB36 grid reference",
+    "point_spacing": "even",
+    "standard_name": "projection_y_coordinate",
+    "units": "m"
+}

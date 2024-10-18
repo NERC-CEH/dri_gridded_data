@@ -1,0 +1,17 @@
+start_year: 2016
+end_year: 2016
+start_month: 12
+end_month: 13
+input_dir: "./test_data/"
+prefix: "CEH-GEAR-1hr-v2_"
+suffix: "-1-day.nc"
+target_root: "./test_data/"
+store_name: "output.zarr"
+target_chunks: 
+  time: 8766
+  y: 100 
+  x: 100 
+  bnds: 2
+num_workers: 1
+prune: 12 # no. of files to process, set to 0 to use all
+

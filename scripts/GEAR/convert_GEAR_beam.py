@@ -22,30 +22,6 @@ from pangeo_forge_recipes.types import Indexed
 
 from GEAR_config import load_yaml_config
 
-if len(sys.argv) != 2:
-   print("Usage: python scripts/convert_GEAR_beam.py <path_to_yaml_file>")
-   sys.exit(1)
-
-file_path = sys.argv[1]
-config = load_yaml_config(file_path)
-
-if not os.path.exists(config.target_root):
-    os.makedirs(config.target_root)
-
-def make_path(time):
-    filename = config.prefix + time + config.suffix
-    print(f"FILENAME: {filename}")
-    return os.path.join(config.input_dir, filename)
-
-years = list(range(config.start_year, config.end_year + 1))
-months = list(range(config.start_month, config.end_month))
-ymonths = [f"{year}{month:02d}" for year in years for month in months]
-time_concat_dim = ConcatDim("time", ymonths)
-
-pattern = FilePattern(make_path, time_concat_dim)
-if config.prune > 0:
-    pattern = pattern.prune(nkeep=config.prune)
-
 # Add in our own custom Beam PTransform (Parallel Transform) to apply
 # some preprocessing to the dataset. In this case to convert the
 # 'bounds' variables to coordinate rather than data variables.
@@ -82,7 +58,27 @@ class DataVarToCoordVar(beam.PTransform):
     def expand(self, pcoll: beam.PCollection) -> beam.PCollection:
         return pcoll | beam.Map(self._datavar_to_coordvar)
 
-recipe = (
+def main(config_file_path):
+    config = load_yaml_config(config_file_path)
+    
+    if not os.path.exists(config.target_root):
+        os.makedirs(config.target_root)
+    
+    def make_path(time):
+        filename = config.prefix + time + config.suffix
+        print(f"FILENAME: {filename}")
+        return os.path.join(config.input_dir, filename)
+    
+    years = list(range(config.start_year, config.end_year + 1))
+    months = list(range(config.start_month, config.end_month))
+    ymonths = [f"{year}{month:02d}" for year in years for month in months]
+    time_concat_dim = ConcatDim("time", ymonths)
+    
+    pattern = FilePattern(make_path, time_concat_dim)
+    if config.prune > 0:
+        pattern = pattern.prune(nkeep=config.prune)
+
+    recipe = (
         beam.Create(pattern.items())
         | OpenWithXarray(file_type=pattern.file_type)
         | DataVarToCoordVar()
@@ -96,12 +92,20 @@ recipe = (
         | ConsolidateMetadata()
         )
 
-if config.num_workers > 1:
-    beam_options = PipelineOptions(
-            direct_num_workers=config.num_workers, direct_running_mode="multi_processing"
-            )
-    with beam.Pipeline(options=beam_options) as p:
-        p | recipe
-else:
-    with beam.Pipeline() as p:
-        p | recipe
+    if config.num_workers > 1:
+        beam_options = PipelineOptions(
+                direct_num_workers=config.num_workers, direct_running_mode="multi_processing"
+                )
+        with beam.Pipeline(options=beam_options) as p:
+            p | recipe
+    else:
+        with beam.Pipeline() as p:
+            p | recipe
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+       print("Usage: python scripts/convert_GEAR_beam.py <path_to_yaml_file>")
+       sys.exit(1)
+    
+    config_file_path = sys.argv[1]
+    main(config_file_path)

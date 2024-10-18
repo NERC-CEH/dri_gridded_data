@@ -1,0 +1,13 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "y",
+        "x"
+    ],
+    "comment": "The minimum distance corresponds to the distance to the closest raingauge used in the nearest neighbour method to estimate the normalised hourly rainfall amount in a grid cell. This distance provides an indicator of accuracy/confidence in the estimated rainfall amount. As the minimum distance increases so does uncertainty in the rainfall estimates. Users should be cautious when using the rainfall data in areas where the minimum distance is large, as the estimates are most likely less reliable. Where min_dist > 50km, rainfall estimates are not produced and statistical disaggregation is used instead.",
+    "coordinates": "lat lon",
+    "long_name": "Minimum distance",
+    "units": "m",
+    "valid_max": 100000.0,
+    "valid_min": 0.0
+}

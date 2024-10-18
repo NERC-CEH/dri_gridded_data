@@ -1,0 +1,28 @@
+{
+    "EPSG_code": "EPSG:27700",
+    "_ARRAY_DIMENSIONS": [],
+    "false_easting": 400000.0,
+    "false_northing": -100000.0,
+    "geographic_coordinate_system_name": "OSGB 1936",
+    "grid_mapping_name": "transverse_mercator",
+    "horizontal_datum_name": "OSGB_1936",
+    "inverse_flattening": 299.3249646,
+    "latitude_of_projection_origin": 49.0,
+    "longitude_of_central_meridian": -2.0,
+    "longitude_of_prime_meridian": 0.0,
+    "prime_meridian_name": "Greenwich",
+    "projected_coordinate_system_name": "OSGB 1936 / British National Grid",
+    "reference_ellipsoid_name": "Airy 1830",
+    "scale_factor_at_projection_origin": 0.9996012717,
+    "semi_major_axis": 6377563.396,
+    "towgs84": [
+        375.0,
+        -111.0,
+        431.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+    ],
+    "unit": "m"
+}

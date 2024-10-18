@@ -1,0 +1,15 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "y",
+        "x"
+    ],
+    "comment": "Statistical disaggregation, based on an average storm shape for a given daily rainfall total, is used when a grid square is greater than 50km from a gauge, or when there is rainfall in the daily record but not in the hourly record. Users should be cautious when using the rainfall data in areas where statistical disaggregation is used, as the estimates are most likely less reliable. Flag value 1 indicates where statistical disaggregation of the daily total was used instead of a real storm shape from the nearest gauge.",
+    "coordinates": "lat lon",
+    "flag_meanings": "no_statistical_disaggregation_used   statistical_disaggregation_used",
+    "flag_values": "0,  1",
+    "long_name": "Statistical disaggregation",
+    "units": "",
+    "valid_max": 1,
+    "valid_min": 0
+}
