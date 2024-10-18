@@ -4,7 +4,7 @@ start_month: 12
 end_month: 13
 input_dir: "./test_data/"
 prefix: "CEH-GEAR-1hr-v2_"
-suffix: "-1-day.nc"
+suffix: "-1-hr.nc"
 target_root: "./test_data/"
 store_name: "output.zarr"
 target_chunks: 

@@ -157,7 +157,7 @@
             "filters": null,
             "order": "C",
             "shape": [
-                25,
+                2,
                 1251,
                 701
             ],
@@ -194,7 +194,7 @@
             "filters": null,
             "order": "C",
             "shape": [
-                25,
+                2,
                 1251,
                 701
             ],
@@ -232,7 +232,7 @@
             "filters": null,
             "order": "C",
             "shape": [
-                25,
+                2,
                 1251,
                 701
             ],
@@ -255,7 +255,7 @@
         },
         "time/.zarray": {
             "chunks": [
-                25
+                2
             ],
             "compressor": {
                 "blocksize": 0,
@@ -269,7 +269,7 @@
             "filters": null,
             "order": "C",
             "shape": [
-                25
+                2
             ],
             "zarr_format": 2
         },
@@ -299,7 +299,7 @@
             "filters": null,
             "order": "C",
             "shape": [
-                25,
+                2,
                 2
             ],
             "zarr_format": 2
