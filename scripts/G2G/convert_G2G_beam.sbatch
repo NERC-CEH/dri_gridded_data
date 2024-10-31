@@ -14,4 +14,4 @@ export PATH=/home/users/mattjbr/miniconda3/bin:$PATH
 source /home/users/mattjbr/miniconda3/bin/activate apache
 
 # run script
-/home/users/mattjbr/miniconda3/envs/apache/bin/ipython /gws/nopw/j04/ceh_generic/matbro/object_storage/scripts/convert_G2G_beam.py
+/home/users/mattjbr/miniconda3/envs/apache/bin/ipython /gws/nopw/j04/ceh_generic/matbro/dri_gridded_data/scripts/G2G/convert_G2G_beam.py
