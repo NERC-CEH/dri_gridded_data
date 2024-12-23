@@ -149,8 +149,8 @@ def run_pipeline():
     if config.num_workers > 1:
         beam_options = PipelineOptions(
                 ["--dask_gateway", "https://dask-gateway.jasmin.ac.uk",
-                 "--dask_worker_cores", "4",
-                 "--dask_worker_memory", "20.0",
+                 "--dask_worker_cores", "1",
+                 "--dask_worker_memory", "50.0",
                  "--dask_worker_setup", dask_worker_setup_cmd,
                  "--dask_workers", str(config.num_workers)], 
         )
