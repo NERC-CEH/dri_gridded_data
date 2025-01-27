@@ -82,9 +82,7 @@ class DataVarToCoordVar(beam.PTransform):
         # Here we convert some of the variables in the file
         # to coordinate variables so that pangeo-forge-recipes
         # can process them
-        logging.info(f'Dataset chunk before preprocessing: {ds =}')
         ds = ds.set_coords(['x_bnds', 'y_bnds', 'time_bnds', 'crs'])
-        logging.info(f'Dataset chunk after preprocessing: {ds =}')
         return index, ds
 
     # this expand function is a necessary part of
