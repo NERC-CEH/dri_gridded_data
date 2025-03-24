@@ -92,7 +92,7 @@ def make_path(time):
 
 years = list(range(config.start_year, config.end_year + 1))
 months = list(range(config.start_month, config.end_month + 1))
-ymonths = [f"{year}{month:02d}" for year in years for month in months]
+ymonths = [f"{year:04d}{month:02d}" for year in years for month in months]
 time_concat_dim = ConcatDim("time", ymonths)
 
 pattern = FilePattern(make_path, time_concat_dim)
@@ -150,7 +150,7 @@ def run_pipeline():
         beam_options = PipelineOptions(
                 ["--dask_gateway", "https://dask-gateway.jasmin.ac.uk",
                  "--dask_worker_cores", "1",
-                 "--dask_worker_memory", "50.0",
+                 "--dask_worker_memory", "20.0",
                  "--dask_worker_setup", dask_worker_setup_cmd,
                  "--dask_workers", str(config.num_workers)], 
         )
