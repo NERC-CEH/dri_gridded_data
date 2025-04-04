@@ -25,7 +25,10 @@ logging.basicConfig(
     level=logging.INFO,
     datefmt='%Y-%m-%d %H:%M:%S')
 
+dotdotpath = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir))
+sys.path.append(dotdotpath)
 from GEAR_config import load_yaml_config
+sys.path.remove(dotdotpath)
 
 if len(sys.argv) != 2:
    print("Usage: python scripts/convert_GEAR_beam.py <path_to_yaml_file>")
@@ -48,10 +51,9 @@ def make_path(time):
     print(f"FILENAME: {filename}")
     return os.path.join(config.input_dir, filename)
 
-years = list(range(config.start_year, config.end_year + 1))
-months = list(range(config.start_month, config.end_month + 1))
-ymonths = [f"{year}{month:02d}" for year in years for month in months]
-time_concat_dim = ConcatDim("time", ymonths)
+iyears = list(range(config.start_year, config.end_year + 1))
+years = [f"{year}" for year in iyears]
+time_concat_dim = ConcatDim("time", years)
 
 pattern = FilePattern(make_path, time_concat_dim)
 if config.prune > 0:
@@ -83,7 +85,7 @@ class DataVarToCoordVar(beam.PTransform):
         # to coordinate variables so that pangeo-forge-recipes
         # can process them
         logging.info(f'Dataset chunk before preprocessing: {ds =}')
-        ds = ds.set_coords(['x_bnds', 'y_bnds', 'time_bnds', 'crs'])
+        ds = ds.set_coords(['lon', 'lat', 'crs'])
         logging.info(f'Dataset chunk after preprocessing: {ds =}')
         return index, ds
 
