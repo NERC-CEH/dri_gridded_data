@@ -1,0 +1,15 @@
+start_year: 1890
+end_year: 2019
+start_month: 1
+end_month: 12
+input_dir: "/home/users/mattjbr/fdri/data/gear-daily/GB/daily"
+prefix: "CEH_GEAR_daily_GB_"
+suffix: ".nc"
+target_root: "/work/scratch-pw2/mattjbr"
+store_name: "geardaily_fulloutput_yearly_100km_chunks.zarr"
+target_chunks: 
+  time: 365
+  y: 100 
+  x: 100 
+num_workers: 1
+prune: 0 # no. of files to process, set to 0 to use all
