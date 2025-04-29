@@ -1,12 +1,12 @@
-start_year: 1961
+start_year: 2017
 end_year: 2020
 start_month: 12
-end_month: 01
+end_month: 1
 input_dir: "/home/users/mattjbr/fdri/data/chess-met"
-prefix: "chess-met_tas_gb_1km_daily__"
+prefix: "chess-met_tas_gb_1km_daily_"
 suffix: ".nc"
 target_root: "/work/scratch-pw2/mattjbr"
-store_name: "chessmet_fulloutput_yearly_100km_chunks.zarr"
+store_name: "chessmet_tas_fulloutput_yearly_100km_chunks.zarr"
 target_chunks: 
   time: 365
   y: 100 

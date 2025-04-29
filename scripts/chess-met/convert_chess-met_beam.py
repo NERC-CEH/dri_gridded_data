@@ -9,6 +9,7 @@
 import os
 import logging
 import sys
+import xarray as xr
 import apache_beam as beam
 from datetime import datetime
 from calendar import monthrange
@@ -58,16 +59,21 @@ ranges = [
     f"{year:04d}{month:02d}01-{year:04d}{month:02d}{monthrange(year, month)[1]:02d}"
     for year in range(config.start_year, config.end_year + 1)
     for month in range(1, 13)
-    if not (year == config.start_year and month != config.start_month) and not (year == config.end_year and month != config.start_month)
+    if not (year == config.start_year and month < config.start_month) and not (year == config.end_year and month > config.end_month)
 ]
-years = list(range(config.start_year, config.end_year + 1))
-months = list(range(config.start_month, config.end_month + 1))
-ymonths = [f"{year}{month:02d}" for year in years for month in months]
-time_concat_dim = ConcatDim("time", ymonths)
+logging.info(ranges)
+
+time_concat_dim = ConcatDim("time", ranges)
 
 pattern = FilePattern(make_path, time_concat_dim)
 if config.prune > 0:
     pattern = pattern.prune(nkeep=config.prune)
+
+for item in pattern.items():
+    logging.info(item)
+    
+lastfile = make_path(ranges[-1])
+lastds = xr.open_dataset(lastfile)
 
 # Add in our own custom Beam PTransform (Parallel Transform) to apply
 # some preprocessing to the dataset. In this case to convert the
@@ -89,12 +95,43 @@ class DataVarToCoordVar(beam.PTransform):
     # the first line of the function below
     def _datavar_to_coordvar(item: Indexed[T]) -> Indexed[T]:
         index, ds = item
+        print(index)
+        print(ds) 
         # do something to each ds chunk here 
         # and leave index untouched.
         # Here we convert some of the variables in the file
         # to coordinate variables so that pangeo-forge-recipes
         # can process them
-        ds = ds.set_coords(['x_bnds', 'y_bnds', 'time_bnds', 'crs'])
+        vars_to_coord = []
+        chunkdims = list(dict(config.target_chunks).keys())
+        nchunkdims = len(chunkdims)
+        concdim = pattern.concat_dims[0]
+        logging.info('chunkdims: ' + str(chunkdims))
+        logging.info('nchunkdims: ' + str(nchunkdims))
+        
+        vars_to_replace = []
+        for key in ds.variables.keys():
+            ndims = len(ds[key].shape)
+            logging.info('Var ' + key + ' has ' + str(ndims) + ' dims')
+            if ndims != nchunkdims:
+                if key not in chunkdims and concdim not in key:
+                    logging.info('Adding ' + key + ' to list of vars to replace')
+                    vars_to_replace.append(key)
+         
+        for vari in vars_to_replace:
+            logging.info('Replacing values of ' + vari + ' with those from ' + lastfile)            
+            ds[vari].values = lastds[vari].values
+            
+        for key in ds.data_vars.keys():
+            ndims = len(ds[key].shape)
+            if ndims != nchunkdims:
+                if key not in chunkdims:
+                    logging.info('Converting ' + key + ' to coordinate variable')
+                    vars_to_coord.append(key)
+        ds = ds.set_coords(vars_to_coord)
+        
+
+        
         return index, ds
 
     # this expand function is a necessary part of
