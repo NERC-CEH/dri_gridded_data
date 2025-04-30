@@ -9,6 +9,7 @@
 import os
 import logging
 import sys
+import numpy as np
 import xarray as xr
 import apache_beam as beam
 from datetime import datetime
@@ -105,7 +106,7 @@ class DataVarToCoordVar(beam.PTransform):
         vars_to_coord = []
         chunkdims = list(dict(config.target_chunks).keys())
         nchunkdims = len(chunkdims)
-        concdim = pattern.concat_dims[0]
+        concdims = pattern.concat_dims
         logging.info('chunkdims: ' + str(chunkdims))
         logging.info('nchunkdims: ' + str(nchunkdims))
         
@@ -114,7 +115,9 @@ class DataVarToCoordVar(beam.PTransform):
             ndims = len(ds[key].shape)
             logging.info('Var ' + key + ' has ' + str(ndims) + ' dims')
             if ndims != nchunkdims:
-                if key not in chunkdims and concdim not in key:
+                concdimmatches = [concdim in ds[key].dims for concdim in concdims]
+                matches_bool = np.any(concdimmatches)
+                if key not in chunkdims and not matches_bool:
                     logging.info('Adding ' + key + ' to list of vars to replace')
                     vars_to_replace.append(key)
          
