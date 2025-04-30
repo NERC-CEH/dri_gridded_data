@@ -96,39 +96,50 @@ class DataVarToCoordVar(beam.PTransform):
     # the first line of the function below
     def _datavar_to_coordvar(item: Indexed[T]) -> Indexed[T]:
         index, ds = item
-        print(index)
-        print(ds) 
         # do something to each ds chunk here 
         # and leave index untouched.
-        # Here we convert some of the variables in the file
-        # to coordinate variables so that pangeo-forge-recipes
-        # can process them
-        vars_to_coord = []
+
+        # which dimensions we are chunking over:
         chunkdims = list(dict(config.target_chunks).keys())
+        # how many dimensions we are chunking over:
         nchunkdims = len(chunkdims)
+        # which dimensions we are concatenating (combining source files) over:
         concdims = pattern.concat_dims
-        logging.info('chunkdims: ' + str(chunkdims))
-        logging.info('nchunkdims: ' + str(nchunkdims))
         
         vars_to_replace = []
+        # go through all the variables in the dataset 'ds'
+        # to figure out which we can safely meddle with.
+        # We are replacing the values of some of the coordinate variables with
+        # those from the last file in the original dataset to avoid issues
+        # updates to the dataset have very very slightly different coordinate
+        # values. We cannot do this for any variables that make use of the 
+        # dimensions we are concatenating over, as this would mess up the
+        # concatenation. We also cannot do this for any of the variables we
+        # are chunking over (e.g. x, y, t), as this would mess up the chunking.
         for key in ds.variables.keys():
             ndims = len(ds[key].shape)
-            logging.info('Var ' + key + ' has ' + str(ndims) + ' dims')
-            if ndims != nchunkdims:
+            if ndims != nchunkdims: # rule out the main dataset variables
+                # rule out the variables that make use of the concat dims
                 concdimmatches = [concdim in ds[key].dims for concdim in concdims]
                 matches_bool = np.any(concdimmatches)
+                # and rule out vars that are the coords for the chunking dims
                 if key not in chunkdims and not matches_bool:
                     logging.info('Adding ' + key + ' to list of vars to replace')
                     vars_to_replace.append(key)
-         
+        # do the coord value replacement for the variables that remain
         for vari in vars_to_replace:
             logging.info('Replacing values of ' + vari + ' with those from ' + lastfile)            
             ds[vari].values = lastds[vari].values
             
-        for key in ds.data_vars.keys():
+        # Here we convert some of the variables in the file
+        # to coordinate variables so that pangeo-forge-recipes
+        # can process them. These are variables that show up as *data*
+        # variables but should really be *coord* variables
+        vars_to_coord = []
+        for key in ds.data_vars.keys(): # go through all the *data* variables
             ndims = len(ds[key].shape)
-            if ndims != nchunkdims:
-                if key not in chunkdims:
+            if ndims != nchunkdims: # rule out the main dataset variable(s)
+                if key not in chunkdims: # rule out the coord vars chunked over
                     logging.info('Converting ' + key + ' to coordinate variable')
                     vars_to_coord.append(key)
         ds = ds.set_coords(vars_to_coord)
