@@ -22,6 +22,9 @@ class Config:
     target_chunks: TargetChunks
     prune: int
     num_workers: int
+    overwrites: str
+    var_overwrites: list
+    overwrite_source: str
 
 def load_yaml_config(file_path: str) -> Config:
     try:

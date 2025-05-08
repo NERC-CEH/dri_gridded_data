@@ -1,7 +1,7 @@
 start_year: 2017
-end_year: 2020
+end_year: 2019
 start_month: 12
-end_month: 1
+end_month: 12
 input_dir: "/home/users/mattjbr/fdri/data/chess-met"
 prefix: "chess-met_tas_gb_1km_daily_"
 suffix: ".nc"
@@ -13,3 +13,8 @@ target_chunks:
   x: 100 
 num_workers: 1
 prune: 0 # no. of files to process, set to 0 to use all
+overwrites: "on" # "on" or "off"
+var_overwrites:
+#  - "lat"
+#  - "lon"
+overwrite_source:
