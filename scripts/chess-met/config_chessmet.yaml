@@ -3,10 +3,20 @@ end_year: 2019
 start_month: 12
 end_month: 12
 input_dir: "/home/users/mattjbr/fdri/data/chess-met"
-prefix: "chess-met_tas_gb_1km_daily_"
-suffix: ".nc"
+filename: "chess-met_{varname}_gb_1km_daily_{time1}-{time2}.nc"
+varnames:
+  - tas
+  - precip
+  - rsds
+  - rlds
+  - huss
+  - sfcWind
+  - psurf
+  - dtr
+time1: "%Y%m%d" # use python datestring formatting codes https://docs.python.org/3/library/datetime.html#format-codes
+time2: "%Y%m%d"
 target_root: "/work/scratch-pw2/mattjbr"
-store_name: "chessmet_tas_fulloutput_yearly_100km_chunks.zarr"
+store_name: "chessmet_fulloutput_yearly_100km_chunks.zarr"
 target_chunks: 
   time: 365
   y: 100 

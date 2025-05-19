@@ -11,10 +11,12 @@ class TargetChunks:
 @dataclass
 class Config:
     input_dir: str
+    filename: str
+    varnames: list
+    time1: str
+    time2: str
     target_root: str
     store_name: str
-    prefix: str
-    suffix: str
     start_year: int
     end_year: int
     start_month: int

@@ -9,12 +9,13 @@
 import os
 import logging
 import sys
+import re
 import numpy as np
 import xarray as xr
+import datetime as dt
 import apache_beam as beam
-from datetime import datetime
-from calendar import monthrange
-from pangeo_forge_recipes.patterns import ConcatDim, FilePattern
+from dateutil.relativedelta import relativedelta
+from pangeo_forge_recipes.patterns import ConcatDim, MergeDim, FilePattern
 from apache_beam.options.pipeline_options import PipelineOptions
 from pangeo_forge_recipes.transforms import (
         OpenWithXarray,
@@ -51,22 +52,84 @@ if not os.path.exists(config.target_root):
     os.makedirs(config.target_root)
 
 # chess-met_tas_gb_1km_daily_20171201-20171231.nc
-def make_path(time):
-    filename = config.prefix + time + config.suffix
+def make_path(variable, time):
+    #filename = config.prefix + time + config.suffix
+    #filename = "chess-met_" + variable + "_gb_1km_daily_" + time + ".nc"
+    #filename = f"chess-met_{variable}_gb_1km_daily_{time}.nc"
+    filename = config.filename
+    filename = re.sub(r"{time1}.*{time2}", "{time}", filename)
+    filename = re.sub(r"{time1}", "{time}", filename)
+    filename = re.sub(r"{time}", time, filename)
+    filename = re.sub(r"{varname}", variable, filename)
+    
     print(f"FILENAME: {filename}")
     return os.path.join(config.input_dir, filename)
 
-ranges = [
-    f"{year:04d}{month:02d}01-{year:04d}{month:02d}{monthrange(year, month)[1]:02d}"
-    for year in range(config.start_year, config.end_year + 1)
-    for month in range(1, 13)
-    if not (year == config.start_year and month < config.start_month) and not (year == config.end_year and month > config.end_month)
-]
-logging.info(ranges)
+freq = 'M' # monthly hard coded for now
+if freq == 'M':
+    # smallest unit we can have represented in the timestring
+    # (one unit less than the file frequency)
+    # e.g. hours for days, days for months, months for years
+    delta = dt.timedelta(days=1)
 
-time_concat_dim = ConcatDim("time", ranges)
+# hardcoded for monthly file frequency for now
+# could be generalised in the future
+if "{time2}" in config.filename:
+    # treat as a range
+    
+    if not "{time1}" in config.filename:
+        raise SyntaxError("{time2} cannot be present in config.filename if " + \
+                          "{time1} is not. You probably just need/meant to " + \
+                          "change {time2} to {time1}")
+    if config.time1 == "":
+       raise SyntaxError("config.time1 cannot be a blank string")
+    if config.time2 == "":
+       raise SyntaxError("config.time2 cannot be a blank string")
+    if not config.time1:
+       raise SyntaxError("config.time1 is empty and must be specified")
+    if not config.time2:
+       raise SyntaxError("config.time2 is empty and must be specified")
+    
+    time1s = [
+       dt.datetime(year, month, 1).strftime(config.time1)
+       for year in range(config.start_year, config.end_year + 1)
+       for month in range(1, 13)
+       if not (year == config.start_year and month < config.start_month) and not (year == config.end_year and month > config.end_month)
+    ]
+    time2s = [
+       (dt.datetime(year, month, 1)+relativedelta(months=1)-delta).strftime(config.time2)
+       for year in range(config.start_year, config.end_year + 1)
+       for month in range(1, 13)
+       if not (year == config.start_year and month < config.start_month) and not (year == config.end_year and month > config.end_month)
+    ]
+    # combine into one string using re.search (& .group() on the output)
+    timestring = re.search(r"{time1}.*{time2}", config.filename).group() # the timestring 
+    ranges = []
+    # replace {time1} and {time2} with what was determined for time1s and time2s
+    for t in range(len(time1s)):
+        range1 = re.sub(r"{time1}", time1s[t], timestring)
+        range2 = re.sub(r"{time2}", time2s[t], range1)
+        ranges.append(range2)
+    logging.info(ranges)
+    times = ranges
+else:
+    # treat as a timestamp
+    if config.time1 == "":
+        raise SyntaxError("config.time1 cannot be a blank string")
+    if not config.time1:
+        raise SyntaxError("config.time1 is empty and must be specified")
+    times = [
+        dt.datetime(year, month, 1).strftime(config.time1)
+        for year in range(config.start_year, config.end_year + 1)
+        for month in range(1, 13)
+        if not (year == config.start_year and month < config.start_month) and not (year == config.end_year and month > config.end_month)
+    ]
 
-pattern = FilePattern(make_path, time_concat_dim)
+
+time_concat_dim = ConcatDim("time", times)
+var_merge_dim = MergeDim("variable", config.varnames)
+
+pattern = FilePattern(make_path, time_concat_dim, var_merge_dim)
 if config.prune > 0:
     pattern = pattern.prune(nkeep=config.prune)
 
@@ -76,10 +139,17 @@ for item in pattern.items():
 if config.overwrites == "on":
     if config.overwrite_source:
         owfile = os.path.join(config.input_dir, config.overwrite_source)
-        owds = xr.open_dataset(owfile)
+        try:
+            owds = xr.open_dataset(owfile)
+        except FileNotFoundError:
+            raise FileNotFoundError("File to be used for overwriting " + owfile + " does not exist")
     else:
-        owfile = make_path(ranges[-1])
-        owds = xr.open_dataset(owfile)
+        owfile = make_path(config.varnames[-1], times[-1])
+        try:
+            owds = xr.open_dataset(owfile)
+        except FileNotFoundError:
+            raise FileNotFoundError("File to be used for overwriting " + owfile + " does not exist. \n" + \
+                                    "This is likely because the generated filenames are incorrect.")
         
 # which dimensions we are chunking over:
 chunkdims = list(dict(config.target_chunks).keys())
@@ -144,8 +214,11 @@ class CoordVarOverwrite(beam.PTransform):
                 
             # do the coord value replacement for the variables that remain
             for vari in vars_to_replace:
-                logging.info('Replacing values of ' + vari + ' with those from ' + owfile)            
-                ds[vari].values = owds[vari].values
+                logging.info('Replacing values of ' + vari + ' with those from ' + owfile)
+                try:
+                   ds[vari].values = owds[vari].values
+                except KeyError:
+                   raise KeyError("Variable " + vari + " not present in overwrite file " + owfile)
         
         return index, ds
 
