@@ -1,6 +1,6 @@
-start_year: 2017
+start_year: 1961
 end_year: 2019
-start_month: 12
+start_month: 1
 end_month: 12
 input_dir: "/home/users/mattjbr/fdri/data/chess-met"
 filename: "chess-met_{varname}_gb_1km_daily_{time1}-{time2}.nc"
@@ -21,7 +21,7 @@ target_chunks:
   time: 365
   y: 100 
   x: 100 
-num_workers: 1
+num_workers: 1 # above 1 is experimental...
 prune: 0 # no. of files to process, set to 0 to use all
 overwrites: "on" # "on" or "off"
 var_overwrites:

@@ -10,6 +10,7 @@ import os
 import logging
 import sys
 import re
+import argparse
 import numpy as np
 import xarray as xr
 import datetime as dt
@@ -25,21 +26,28 @@ from pangeo_forge_recipes.transforms import (
         T,    
         )
 from pangeo_forge_recipes.types import Indexed
+
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
     level=logging.INFO,
     datefmt='%Y-%m-%d %H:%M:%S')
 
+# read in command line args, currently just the path to the config file
+parser = argparse.ArgumentParser()
+parser.add_argument('configpath', type=str)
+        
+args, beam_args = parser.parse_known_args()
+file_path = args.configpath
+
+if len(sys.argv) != 2:
+   print("Usage: python scripts/convert_chess-met_beam.py <path_to_yaml_file>")
+   sys.exit(1)
+   
 dotdotpath = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir))
 sys.path.append(dotdotpath)
 from GEAR_config import load_yaml_config
 sys.path.remove(dotdotpath)
 
-if len(sys.argv) != 2:
-   print("Usage: python scripts/convert_chess-met_beam.py <path_to_yaml_file>")
-   sys.exit(1)
-
-file_path = sys.argv[1]
 config = load_yaml_config(file_path)
 
 logging.info('Converting data in ' + config.input_dir + ' from ' + str(config.start_year) + ' to ' + str(config.end_year))
@@ -150,11 +158,11 @@ if config.overwrites == "on":
         except FileNotFoundError:
             raise FileNotFoundError("File to be used for overwriting " + owfile + " does not exist. \n" + \
                                     "This is likely because the generated filenames are incorrect.")
+else:
+    owfile = ""
         
 # which dimensions we are chunking over:
 chunkdims = list(dict(config.target_chunks).keys())
-# how many dimensions we are chunking over:
-nchunkdims = len(chunkdims)
 # which dimensions we are concatenating (combining source files) over:
 concdims = pattern.concat_dims
 
@@ -171,6 +179,14 @@ concdims = pattern.concat_dims
 # They are implemented as subclasses of the beam.PTransform class
 class CoordVarOverwrite(beam.PTransform):
 
+    # enable the custom Beam PTransform to access variables we pass it 
+    def __init__(self, config, chunkdims, concdims, owfile):
+        super().__init__()
+        self.config = config
+        self.chunkdims = chunkdims
+        self.concdims = concdims
+        self.owfile = owfile
+
     # not sure why it needs to be a staticmethod
     @staticmethod
     # preprocess functions should take in and return an
@@ -181,7 +197,10 @@ class CoordVarOverwrite(beam.PTransform):
     # each containing some type of 'index' and a 'chunk' of
     # the dataset or a reference to it, as can be seen in
     # the first line of the function below
-    def _coordvar_overwrite(item: Indexed[T]) -> Indexed[T]:
+    def _coordvar_overwrite(item: Indexed[T], config, chunkdims, concdims, owfile) -> Indexed[T]:
+        import numpy as np
+        import xarray as xr
+        
         index, ds = item
         # do something to each ds chunk here 
         # and leave index untouched.
@@ -194,7 +213,10 @@ class CoordVarOverwrite(beam.PTransform):
             # we are concatenating over and are not the variables for the 
             # dimensions we're chunking over. 
             if not config.var_overwrites:
-                
+
+                # how many dimensions we are chunking over:
+                nchunkdims = len(chunkdims)
+
                 vars_to_replace = []
                 # go through all the variables in the dataset 'ds'
                 # to figure out which we can safely meddle with.
@@ -216,6 +238,7 @@ class CoordVarOverwrite(beam.PTransform):
             for vari in vars_to_replace:
                 logging.info('Replacing values of ' + vari + ' with those from ' + owfile)
                 try:
+                   owds = xr.open_dataset(owfile)
                    ds[vari].values = owds[vari].values
                 except KeyError:
                    raise KeyError("Variable " + vari + " not present in overwrite file " + owfile)
@@ -227,16 +250,23 @@ class CoordVarOverwrite(beam.PTransform):
     # it wraps the above preprocess function and applies
     # it to the PCollection, i.e. all the 'ds' chunks in Indexed
     def expand(self, pcoll: beam.PCollection) -> beam.PCollection:
-        return pcoll | beam.Map(self._coordvar_overwrite)
+        return pcoll | beam.Map(self._coordvar_overwrite, self.config, self.chunkdims, self.concdims, self.owfile)
     
 # In this case to convert any coordinate variables that show up as *data*
 # variables in the xarray dataset model, such as the 'bounds' variables, 
 # to *coordinate* variables so that pangeo-forge-recipes leaves them alone
 class DataVarToCoordVar(beam.PTransform):
     
+    def __init__(self, chunkdims):
+        super().__init__()
+        self.chunkdims = chunkdims
+    
     @staticmethod
-    def _datavar_to_coordvar(item: Indexed[T]) -> Indexed[T]:
+    def _datavar_to_coordvar(item: Indexed[T], chunkdims) -> Indexed[T]:
         index, ds = item
+        
+        # how many dimensions we are chunking over:
+        nchunkdims = len(chunkdims)
         
         # Here we convert some of the variables in the file
         # to coordinate variables so that pangeo-forge-recipes
@@ -254,7 +284,7 @@ class DataVarToCoordVar(beam.PTransform):
         return index, ds
     
     def expand(self, pcoll: beam.PCollection) -> beam.PCollection:
-        return pcoll | beam.Map(self._datavar_to_coordvar)
+        return pcoll | beam.Map(self._datavar_to_coordvar, self.chunkdims)
 
 # =============================================================================
 # Assemble the recipe (workflow) we want to run from the various building
@@ -264,8 +294,8 @@ class DataVarToCoordVar(beam.PTransform):
 recipe = (
         beam.Create(pattern.items())
         | OpenWithXarray(file_type=pattern.file_type)
-        | CoordVarOverwrite()
-        | DataVarToCoordVar()
+        | CoordVarOverwrite(config, chunkdims, concdims, owfile)
+        | DataVarToCoordVar(chunkdims)
         | StoreToZarr(
             target_root=config.target_root,
             store_name=config.store_name,
