@@ -1,0 +1,16 @@
+start_year: 1990
+end_year: 2016
+start_month: 1
+end_month: 12
+input_dir: "/home/users/mattjbr/fdri/data/gear-hrly"
+prefix: "CEH-GEAR-1hr-v2_"
+suffix: ".nc"
+target_root: "/work/scratch-pw2/mattjbr"
+store_name: "gearhrly_fulloutput_15day_100km_chunks.zarr"
+target_chunks: 
+  time: 360
+  y: 100 
+  x: 100 
+  bnds: 2
+num_workers: 1
+prune: 0 # no. of files to process, set to 0 to use all
