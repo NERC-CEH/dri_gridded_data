@@ -11,11 +11,9 @@ import logging
 import sys
 import re
 import argparse
-import numpy as np
 import xarray as xr
 import datetime as dt
 import apache_beam as beam
-from dateutil.relativedelta import relativedelta
 from pangeo_forge_recipes.patterns import ConcatDim, MergeDim, FilePattern
 from apache_beam.options.pipeline_options import PipelineOptions
 from pangeo_forge_recipes.transforms import (
@@ -73,66 +71,52 @@ def make_path(variable, time):
     print(f"FILENAME: {filename}")
     return os.path.join(config.input_dir, filename)
 
-freq = 'M' # monthly hard coded for now
-if freq == 'M':
-    # smallest unit we can have represented in the timestring
-    # (one unit less than the file frequency)
-    # e.g. hours for days, days for months, months for years
-    delta = dt.timedelta(days=1)
+#freq = 'M' # monthly hard coded for now
+#if freq == 'M':
+#    # smallest unit we can have represented in the timestring
+#    # (one unit less than the file frequency)
+#    # e.g. hours for days, days for months, months for years
+#    delta = dt.timedelta(days=1)
 
 # hardcoded for monthly file frequency for now
 # could be generalised in the future
-if "{time2}" in config.filename:
-    # treat as a range
+def get_next_month(date: dt.datetime) -> dt.datetime:
+    if date.month == 12:
+        return date.replace(year=date.year + 1, month=1, day=1)
+    else:
+        return date.replace(month=date.month + 1, day=1)
     
-    if not "{time1}" in config.filename:
-        raise SyntaxError("{time2} cannot be present in config.filename if " + \
-                          "{time1} is not. You probably just need/meant to " + \
-                          "change {time2} to {time1}")
-    if config.time1 == "":
-       raise SyntaxError("config.time1 cannot be a blank string")
-    if config.time2 == "":
-       raise SyntaxError("config.time2 cannot be a blank string")
-    if not config.time1:
-       raise SyntaxError("config.time1 is empty and must be specified")
-    if not config.time2:
-       raise SyntaxError("config.time2 is empty and must be specified")
-    
-    time1s = [
-       dt.datetime(year, month, 1).strftime(config.time1)
-       for year in range(config.start_year, config.end_year + 1)
-       for month in range(1, 13)
-       if not (year == config.start_year and month < config.start_month) and not (year == config.end_year and month > config.end_month)
-    ]
-    time2s = [
-       (dt.datetime(year, month, 1)+relativedelta(months=1)-delta).strftime(config.time2)
-       for year in range(config.start_year, config.end_year + 1)
-       for month in range(1, 13)
-       if not (year == config.start_year and month < config.start_month) and not (year == config.end_year and month > config.end_month)
-    ]
-    # combine into one string using re.search (& .group() on the output)
-    timestring = re.search(r"{time1}.*{time2}", config.filename).group() # the timestring 
-    ranges = []
-    # replace {time1} and {time2} with what was determined for time1s and time2s
-    for t in range(len(time1s)):
-        range1 = re.sub(r"{time1}", time1s[t], timestring)
-        range2 = re.sub(r"{time2}", time2s[t], range1)
-        ranges.append(range2)
-    logging.info(ranges)
-    times = ranges
-else:
-    # treat as a timestamp
-    if config.time1 == "":
-        raise SyntaxError("config.time1 cannot be a blank string")
-    if not config.time1:
-        raise SyntaxError("config.time1 is empty and must be specified")
-    times = [
-        dt.datetime(year, month, 1).strftime(config.time1)
-        for year in range(config.start_year, config.end_year + 1)
-        for month in range(1, 13)
-        if not (year == config.start_year and month < config.start_month) and not (year == config.end_year and month > config.end_month)
-    ]
+def get_last_of_month(date: dt.datetime) -> dt.datetime:
+    next_month = get_next_month(date)
+    return next_month - dt.timedelta(days=next_month.day)
 
+def create_file_list(
+    start_date: dt.datetime,
+    end_date: dt.datetime,
+    time_pattern: str,
+    date_format: str = "%Y%m%d",
+) -> list[str]:
+    current = dt.datetime(start_date.year, start_date.month, start_date.day)
+    times = []
+    while current <= end_date:
+        start_of_month = current.replace(day=1)
+        next_month = get_next_month(current)
+        last_of_month = next_month - dt.timedelta(days=1)
+        file_name = time_pattern.format(
+            start_date=start_of_month.strftime(date_format),
+            end_date=last_of_month.strftime(date_format),
+        )
+        times.append(file_name)
+        current = next_month
+    return times
+
+if "{end_date}" in config.filename:
+    time_pattern = re.search(r"{start_date}.*{end_date}", config.filename).group()
+else:
+    time_pattern = "{start_date}"    
+start = dt.datetime(year=config.start_year, month=config.start_month, day=1)
+end = dt.datetime(year=config.end_year, month=config.end_month, day=get_last_of_month(dt.datetime(year=config.end_year, month=config.end_month, day=1)).day)
+times = create_file_list(start, end, time_pattern, date_format=config.date_format)
 
 time_concat_dim = ConcatDim("time", times)
 var_merge_dim = MergeDim("variable", config.varnames)

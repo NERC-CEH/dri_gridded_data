@@ -13,8 +13,7 @@ class Config:
     input_dir: str
     filename: str
     varnames: list
-    time1: str
-    time2: str
+    date_format: str
     target_root: str
     store_name: str
     start_year: int
