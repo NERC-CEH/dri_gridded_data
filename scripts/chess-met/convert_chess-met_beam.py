@@ -63,8 +63,8 @@ def make_path(variable, time):
     #filename = "chess-met_" + variable + "_gb_1km_daily_" + time + ".nc"
     #filename = f"chess-met_{variable}_gb_1km_daily_{time}.nc"
     filename = config.filename
-    filename = re.sub(r"{time1}.*{time2}", "{time}", filename)
-    filename = re.sub(r"{time1}", "{time}", filename)
+    filename = re.sub(r"{start_date}.*{end_date}", "{time}", filename)
+    filename = re.sub(r"{start_date}", "{time}", filename)
     filename = re.sub(r"{time}", time, filename)
     filename = re.sub(r"{varname}", variable, filename)
     
@@ -117,6 +117,7 @@ else:
 start = dt.datetime(year=config.start_year, month=config.start_month, day=1)
 end = dt.datetime(year=config.end_year, month=config.end_month, day=get_last_of_month(dt.datetime(year=config.end_year, month=config.end_month, day=1)).day)
 times = create_file_list(start, end, time_pattern, date_format=config.date_format)
+print(times)
 
 time_concat_dim = ConcatDim("time", times)
 var_merge_dim = MergeDim("variable", config.varnames)
