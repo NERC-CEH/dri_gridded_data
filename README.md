@@ -31,10 +31,9 @@ The config files contain the following user-configurable variables:
 -  `end_year`: The year of the last file in the dataset (YYYY)
 -  `end_month`: The month of the last file in the dataset (MM)
 -  `input_dir`: The path to the directory/folder containing the dataset files
--  `filename`: A template for the filenames of the files, containing {var} to substitute for varnames, {time1} for a timestamp and optionally {time2} for a second timestamp (e.g. if there is a range in the filename)
+-  `filename`: A template for the filenames of the files, containing {varname} to substitute for varnames, {start_date} for a timestamp and optionally {end_date} for a second timestamp (e.g. if there is a range in the filename)
 -  `varnames`: A list of all the variable names in the dataset. Currently the variable names in the filenames have to be the same as the variable names in the netcdf files.
--  `time1`: A [python datestring format code](https://docs.python.org/3/library/datetime.html#format-codes) that represents the format of {time1} in the filename 
--  `time2`: A [python datestring format code](https://docs.python.org/3/library/datetime.html#format-codes) that represents the format of {time2} in the filename
+-  `date_format`: A [python datestring format code](https://docs.python.org/3/library/datetime.html#format-codes) that represents the format of {start_date} (and {end_date} if present) in the filename 
 -  `target_root`: The path to the folder in which to store the output zarr dataset
 -  `store_name`: The name of the output zarr dataset
 -  `target_chunks`: A dictionary with the dimension names of the desired output dataset chunking as the keys and size of these dimensions as the values
