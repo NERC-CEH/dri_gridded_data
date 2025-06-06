@@ -6,6 +6,8 @@ DRI Gridded Data Repository. Work in progress. The idea with this repo is to dev
 
 The first product that we are developing is to allow for easy conversion of various gridded datasets to [ARCO](https://ieeexplore.ieee.org/abstract/document/9354557) ([Zarr](https://zarr.readthedocs.io/en/stable/)) format and easy upload to [object storage](https://github.com/NERC-CEH/object_store_tutorial?tab=readme-ov-file#what-is-object-storage). This product is built upon [pangeo-forge-recipes](https://pangeo-forge.readthedocs.io/en/latest/) which provides convenience functions for [Apache Beam](https://beam.apache.org/), which handles all the complexity of the performant parallelisation needed for rapid execution of the conversion. For more information on the reasons and motivation for converting data to ARCO format see the [README](https://github.com/NERC-CEH/object_store_tutorial) of the repository that generated the idea for this product. 
 
+Currently the product has been designed for datasets stored in monthly netcdf files. The monthly file-frequency restriction is intended to be relaxed in future versions. 
+
 # Developer information
 
 [Product description document](https://cehacuk.sharepoint.com/:w:/s/FDRI-WP2Digital/EbX7pJCS6alKrckL_jU-Dd8B41KHJYWzEYN27qGHkWXL7w?e=8gnEbc)
@@ -15,12 +17,37 @@ The first product that we are developing is to allow for easy conversion of vari
 - Download local copy of repository: `git clone git@github.com:NERC-CEH/dri_gridded_data.git`
 - Create a conda environment from the environment.yml file: `conda create --name dri_gridded_data --file environment.yml`
 
+## Structure
+
+- Currently all the action takes place in the 'scripts' folder
+- Within the scripts folder there is a folder for each dataset that has been converted
+- Within each dataset's folder there is at least: a config file (yaml format) and a python script
+
+## Config
+
+The config files contain the following user-configurable variables:
+-  `start_year`: The year of the first file in the dataset (YYYY)
+-  `start_month`: The month of the first file in the dataset (MM)
+-  `end_year`: The year of the last file in the dataset (YYYY)
+-  `end_month`: The month of the last file in the dataset (MM)
+-  `input_dir`: The path to the directory/folder containing the dataset files
+-  `filename`: A template for the filenames of the files, containing {varname} to substitute for varnames, {start_date} for a timestamp and optionally {end_date} for a second timestamp (e.g. if there is a range in the filename)
+-  `varnames`: A list of all the variable names in the dataset. Currently the variable names in the filenames have to be the same as the variable names in the netcdf files.
+-  `date_format`: A [python datestring format code](https://docs.python.org/3/library/datetime.html#format-codes) that represents the format of {start_date} (and {end_date} if present) in the filename 
+-  `target_root`: The path to the folder in which to store the output zarr dataset
+-  `store_name`: The name of the output zarr dataset
+-  `target_chunks`: A dictionary with the dimension names of the desired output dataset chunking as the keys and size of these dimensions as the values
+-  `num_workers`: Number of workers to use in the computation of the new dataset. Note that anything above 1 is currently experimental and may fail for weird reasons
+-  `prune`: Used for testing. Instead of running with all the dataset's files, just use the first X
+-  `overwrites`: "off" or "on". Whether or not to overwrite one or more of the dataset's variables with data from one of the dataset's files. Designed for coordinate variables that may differ slightly between different version of the dataset
+-  `var_overwrites`: Optional. Which variables in the dataset to overwrite. If not specified and `overwrites` is "on", all variables that can be safely overwritten are
+-  `overwrite_source`: Optional. Filename of a file in the dataset to use to source the variables' data to use to overwrite. If not specified and `overwrites` is "on", the last file of the dataset is used. 
+
 ## Running instructions
 
-- To run the netcdf --> zarr conversion script on your local machine: `ipython scripts/GEAR/convert_GEAR_beam.py config/<your_config>.yaml`
-- To run it on a SLURM-controlled HPC (such as JASMIN LOTUS): `sbatch scripts/GEAR/convert_GEAR_beam.sbatch`
-
-(editing the variables defined in the scripts as appropriate)
+- The python conversion scripts take in the config file as their only argument so to run one:
+- `ipython path/to/convert/script.py /path/to/config/file.yaml`
+- The scripts and config file in the scripts/GEAR/daily and hrly folders are set up to run on the JASMIN sci-machines. But so long as the environment is installed and the paths to the data are correct this can be run on any machine.
 
 # Disclaimer
 
