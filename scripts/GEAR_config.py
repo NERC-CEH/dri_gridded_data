@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from omegaconf import OmegaConf
+from typing import Optional
 
 @dataclass
 class TargetChunks:
@@ -11,17 +12,21 @@ class TargetChunks:
 @dataclass
 class Config:
     input_dir: str
+    filename: str
+    varnames: list
+    date_format: Optional[str] = "%Y%m%d"
     target_root: str
     store_name: str
-    prefix: str
-    suffix: str
     start_year: int
     end_year: int
-    start_month: int
-    end_month: int
+    start_month: Optional[int] = 1
+    end_month: Optional[int] = 12
     target_chunks: TargetChunks
-    prune: int
-    num_workers: int
+    prune: Optional[int] = 0
+    num_workers: Optional[int] = 1
+    overwrites: Optional[str] = "off"
+    var_overwrites: Optional[list] = []
+    overwrite_source: Optional[str] = ""
 
 def load_yaml_config(file_path: str) -> Config:
     try:

@@ -1,0 +1,29 @@
+start_year: 1961
+end_year: 2019
+start_month: 1
+end_month: 12
+input_dir: "/home/users/mattjbr/fdri/data/chess-met"
+filename: "chess-met_{varname}_gb_1km_daily_{start_date}-{end_date}.nc"
+varnames:
+  - tas
+  - precip
+  - rsds
+  - rlds
+  - huss
+  - sfcWind
+  - psurf
+  - dtr
+date_format: "%Y%m%d" # use python datestring formatting codes https://docs.python.org/3/library/datetime.html#format-codes
+target_root: "/work/scratch-nopw2/mattjbr"
+store_name: "chessmet_fulloutput_yearly_100km_chunks.zarr"
+target_chunks: 
+  time: 365
+  y: 100 
+  x: 100 
+num_workers: 1 # above 1 is experimental...
+prune: 0 # no. of files to process, set to 0 to use all
+overwrites: "on" # "on" or "off"
+var_overwrites:
+#  - "lat"
+#  - "lon"
+overwrite_source:
