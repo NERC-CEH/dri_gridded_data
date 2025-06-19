@@ -1,28 +1,36 @@
-start_year: 1961
-end_year: 2019
-start_month: 1
-end_month: 12
-input_dir: "/home/users/mattjbr/fdri/data/chess-met"
-filename: "chess-met_{varname}_gb_1km_daily_{start_date}-{end_date}.nc"
+start_year: 1980
+end_year: 2080
+start_month: 12
+end_month: 11
+input_dir: "/home/users/mattjbr/fdri/data/chess-scape/rcp85"
+filename: "{ensmem}/daily/{varname}/chess-scape_rcp85_{ensmem}_{varname}_uk_1km_daily_{start_date}-{end_date}.nc"
 varnames:
   - tas
-  - precip
+  - tasmax
+  - tasmin
   - rsds
   - rlds
   - huss
+  - hurs
   - sfcWind
   - psurf
+  - pr
   - dtr
+ensmems:
+  - "01"
+  - "04"
+  - "06"
+  - "15"
 date_format: "%Y%m%d" # use python datestring formatting codes https://docs.python.org/3/library/datetime.html#format-codes
 target_root: "/work/scratch-nopw2/mattjbr"
-store_name: "chessmet_fulloutput_yearly_100km_chunks.zarr"
+store_name: "chess-scape_rcp85_01_yearly_100km_chunks.zarr"
 target_chunks: 
-  time: 365
+  time: 360
   y: 100 
   x: 100 
 num_workers: 1 # above 1 is experimental...
 prune: 0 # no. of files to process, set to 0 to use all
-overwrites: "on" # "on" or "off"
+overwrites: "off" # "on" or "off"
 var_overwrites:
 #  - "lat"
 #  - "lon"

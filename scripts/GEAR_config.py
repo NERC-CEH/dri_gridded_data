@@ -14,6 +14,7 @@ class Config:
     input_dir: str
     filename: str
     varnames: list
+    ensmems: list
     date_format: Optional[str] = "%Y%m%d"
     target_root: str
     store_name: str

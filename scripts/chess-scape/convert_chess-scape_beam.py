@@ -38,7 +38,7 @@ args, beam_args = parser.parse_known_args()
 file_path = args.configpath
 
 if len(sys.argv) != 2:
-   print("Usage: python scripts/convert_chess-met_beam.py <path_to_yaml_file>")
+   print("Usage: python scripts/convert_chess-scape_beam.py <path_to_yaml_file>")
    sys.exit(1)
    
 dotdotpath = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir))
@@ -57,16 +57,14 @@ if config.prune > 0:
 if not os.path.exists(config.target_root):
     os.makedirs(config.target_root)
 
-# chess-met_tas_gb_1km_daily_20171201-20171231.nc
-def make_path(variable, time):
-    #filename = config.prefix + time + config.suffix
-    #filename = "chess-met_" + variable + "_gb_1km_daily_" + time + ".nc"
-    #filename = f"chess-met_{variable}_gb_1km_daily_{time}.nc"
+# chess-scape_rcp85_01_tas_uk_1km_daily_20171201-20171231.nc
+def make_path(variable, ensmem, time):
     filename = config.filename
     filename = re.sub(r"{start_date}.*{end_date}", "{time}", filename)
     filename = re.sub(r"{start_date}", "{time}", filename)
     filename = re.sub(r"{time}", time, filename)
     filename = re.sub(r"{varname}", variable, filename)
+    filename = re.sub(r"{ensmem}", ensmem, filename)
     
     print(f"FILENAME: {filename}")
     return os.path.join(config.input_dir, filename)
@@ -121,6 +119,7 @@ print(times)
 
 time_concat_dim = ConcatDim("time", times)
 var_merge_dim = MergeDim("variable", config.varnames)
+ensmem_merge_dim = ConcatDim("ensmem", config.ensmems)
 
 pattern = FilePattern(make_path, time_concat_dim, var_merge_dim)
 if config.prune > 0:
