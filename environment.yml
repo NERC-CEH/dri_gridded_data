@@ -3,7 +3,7 @@
 # platform: linux-64
 @EXPLICIT
 https://conda.anaconda.org/conda-forge/linux-64/_libgcc_mutex-0.1-conda_forge.tar.bz2
-https://conda.anaconda.org/conda-forge/linux-64/ca-certificates-2024.8.30-hbcca054_0.conda
+https://conda.anaconda.org/conda-forge/noarch/ca-certificates-2025.4.26-hbd8a1cb_0.conda
 https://conda.anaconda.org/conda-forge/linux-64/ld_impl_linux-64-2.43-h712a8e2_0.conda
 https://conda.anaconda.org/conda-forge/linux-64/python_abi-3.10-5_cp310.conda
 https://conda.anaconda.org/conda-forge/noarch/tzdata-2024a-h8827d51_1.conda
@@ -80,12 +80,13 @@ https://conda.anaconda.org/conda-forge/linux-64/libxml2-2.12.7-he7c6b58_4.conda
 https://conda.anaconda.org/conda-forge/linux-64/orc-1.7.6-h6c59b99_0.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/python-3.10.8-h257c98d_0_cpython.conda
 https://conda.anaconda.org/conda-forge/noarch/aiohappyeyeballs-2.4.0-pyhd8ed1ab_0.conda
+https://conda.anaconda.org/conda-forge/noarch/antlr-python-runtime-4.9.3-pyhd8ed1ab_1.tar.bz2
 https://conda.anaconda.org/conda-forge/noarch/asciitree-0.3.3-py_2.tar.bz2
 https://conda.anaconda.org/conda-forge/noarch/attrs-24.2.0-pyh71513ae_0.conda
 https://conda.anaconda.org/conda-forge/linux-64/aws-c-event-stream-0.2.7-h3541f99_13.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/brotli-python-1.0.9-py310hd8f1fbe_9.conda
 https://conda.anaconda.org/conda-forge/noarch/cached_property-1.5.2-pyha770c72_1.tar.bz2
-https://conda.anaconda.org/conda-forge/noarch/certifi-2024.8.30-pyhd8ed1ab_0.conda
+https://conda.anaconda.org/conda-forge/noarch/certifi-2025.4.26-pyhd8ed1ab_0.conda
 https://conda.anaconda.org/conda-forge/noarch/charset-normalizer-3.3.2-pyhd8ed1ab_0.conda
 https://conda.anaconda.org/conda-forge/noarch/click-8.1.7-unix_pyh707e725_0.conda
 https://conda.anaconda.org/conda-forge/noarch/cloudpickle-2.2.1-pyhd8ed1ab_0.conda
@@ -204,6 +205,7 @@ https://conda.anaconda.org/conda-forge/linux-64/libcblas-3.9.0-24_linux64_openbl
 https://conda.anaconda.org/conda-forge/linux-64/libgoogle-cloud-2.1.0-hf2e47f9_1.tar.bz2
 https://conda.anaconda.org/conda-forge/linux-64/liblapack-3.9.0-24_linux64_openblas.conda
 https://conda.anaconda.org/conda-forge/noarch/matplotlib-inline-0.1.7-pyhd8ed1ab_0.conda
+https://conda.anaconda.org/conda-forge/noarch/omegaconf-2.3.0-pyhd8ed1ab_0.conda
 https://conda.anaconda.org/conda-forge/noarch/overrides-7.7.0-pyhd8ed1ab_0.conda
 https://conda.anaconda.org/conda-forge/noarch/partd-1.4.2-pyhd8ed1ab_0.conda
 https://conda.anaconda.org/conda-forge/noarch/pexpect-4.9.0-pyhd8ed1ab_0.conda
@@ -273,14 +275,19 @@ https://conda.anaconda.org/conda-forge/noarch/requests-2.32.3-pyhd8ed1ab_0.conda
 https://conda.anaconda.org/conda-forge/noarch/xarray-2024.9.0-pyhd8ed1ab_0.conda
 https://conda.anaconda.org/conda-forge/noarch/zarr-2.18.3-pyhd8ed1ab_0.conda
 https://conda.anaconda.org/conda-forge/noarch/aiobotocore-2.15.1-pyhd8ed1ab_0.conda
+https://conda.anaconda.org/conda-forge/noarch/cf_xarray-0.10.5-pyhd8ed1ab_0.conda
 https://conda.anaconda.org/conda-forge/noarch/jupyter_console-6.6.3-pyhd8ed1ab_0.conda
 https://conda.anaconda.org/conda-forge/noarch/jupyter_events-0.10.0-pyhd8ed1ab_0.conda
 https://conda.anaconda.org/conda-forge/noarch/kerchunk-0.2.6-pyhd8ed1ab_0.conda
 https://conda.anaconda.org/conda-forge/noarch/nbclient-0.10.0-pyhd8ed1ab_0.conda
 https://conda.anaconda.org/conda-forge/linux-64/pyarrow-9.0.0-py310h9be7b57_2_cpu.tar.bz2
 https://conda.anaconda.org/conda-forge/noarch/requests-kerberos-0.15.0-pyh707e725_0.conda
+https://conda.anaconda.org/conda-forge/noarch/s3transfer-0.10.4-pyhd8ed1ab_1.conda
+https://conda.anaconda.org/conda-forge/noarch/xarray-datatree-0.0.14-pyhd8ed1ab_0.conda
+https://conda.anaconda.org/conda-forge/noarch/boto3-1.35.23-pyhd8ed1ab_0.conda
 https://conda.anaconda.org/conda-forge/noarch/dask-expr-1.1.10-pyhd8ed1ab_0.conda
 https://conda.anaconda.org/conda-forge/noarch/nbconvert-core-7.16.4-pyhd8ed1ab_1.conda
+https://conda.anaconda.org/conda-forge/noarch/ndpyramid-0.0.7-pyhd8ed1ab_0.conda
 https://conda.anaconda.org/conda-forge/noarch/pyarrow-hotfix-0.6-pyhd8ed1ab_0.conda
 https://conda.anaconda.org/conda-forge/noarch/python-hdfs-2.7.3-pyhd8ed1ab_0.conda
 https://conda.anaconda.org/conda-forge/noarch/s3fs-2024.9.0-pyhd8ed1ab_0.conda
