@@ -21,7 +21,9 @@ Currently the product has been designed for datasets stored in monthly netcdf fi
 
 - Currently all the action takes place in the 'scripts' folder
 - Within the scripts folder there is a folder for each dataset that has been converted
-- Within each dataset's folder there is at least: a config file (yaml format) and a python script
+- Within each dataset's folder there is at least: a config file (yaml format) and a python script which runs the conversion process.
+
+So there is currently one script for each dataset, however the latest script, which is currently the script for *chess-met*, is able to process the other datasets and any future datasets for which no further functionality is required (i.e. it is backwards-compatible with datasets processed earlier in the development process) Future work intends to just have one conversion script that works for all datasets, and just config files for the datasets. 
 
 ## Config
 
@@ -46,8 +48,8 @@ The config files contain the following user-configurable variables:
 ## Running instructions
 
 - The python conversion scripts take in the config file as their only argument so to run one:
-- `ipython path/to/convert/script.py /path/to/config/file.yaml`
-- The scripts and config file in the scripts/GEAR/daily and hrly folders are set up to run on the JASMIN sci-machines. But so long as the environment is installed and the paths to the data are correct this can be run on any machine.
+- `ipython path/to/convert/script.py path/to/config/file.yaml`
+- Memory usage can be an issue for datasets >=O(100GB), due to the usage of Beam's rough-and-ready 'Direct Runner', which is not designed for operational use. Usage of an HPC is recommended for such datasets. An example batch job submission script for SLURM-based HPCs is available in the 'chess-met' folder.
 
 # Disclaimer
 
