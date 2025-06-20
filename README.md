@@ -1,6 +1,6 @@
 # DRI Gridded Data
 
-DRI Gridded Data Repository. Work in progress. The idea with this repo is to develop a suite of tools to make working with large gridded datasets easier. This is outlined in the [diagram](https://github.com/NERC-CEH/dri_gridded_data/blob/main/img/gridded_data_tools_workflow_diagram.png) below. The background colours represent the progress of the work. Green = Done, Yellow = Actively being worked on, Red = Not started. 
+DRI Gridded Data Repository. Work in progress. The idea with this repo is to develop a suite of tools to make working with large gridded datasets easier. This is outlined in the [diagram](https://github.com/NERC-CEH/dri_gridded_data/blob/main/img/gridded_data_tools_workflow_diagram.png) below. The background colours represent the progress of the work. Green = Completed for now, Yellow = Actively being worked on, Red = Not started. 
 
 ![workflow](img/gridded_data_tools_workflow_diagram.png)
 
