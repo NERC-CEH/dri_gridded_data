@@ -15,6 +15,7 @@ import pandas as pd
 import geopandas as gpd
 from rasterio import features
 from affine import Affine
+import s3fs
 
 # ------------------
 # functions
@@ -372,7 +373,7 @@ def catchment_subset_pointdata(data, coords, sfname, IDname, IDs):
 
     return newdata, newcoords, srs
 
-def catchment_subset_shapefile(data=None, datafile=None, multifile=0, sfname=None, xname='x', yname='y', IDname=None, IDs=None, drop=0):
+def catchment_subset_shapefile(data=None, datafile=None, multifile=0, sfname=None, endpoint=None, xname='x', yname='y', IDname=None, IDs=None, drop=0):
     '''
     Function to subset an xarray dataarray or dataset, or netcdf dataset, to selected shapes from 
     a shapefile. Returns an xarray dataset with of the same shape as the input
@@ -382,7 +383,8 @@ def catchment_subset_shapefile(data=None, datafile=None, multifile=0, sfname=Non
     data:     An xarray DataArray or DataSet
     datafile: The filename of the netcdf file to subset. Multiple files can be selected with * etc.
               If this is the case multifile should be set to 1. Defaults to 0.
-    sfname:   The filename of the shapefile
+    sfname:   The filepath of the shapefile
+    endpoint: Used if sfname is an s3 path. The endpoint_url for the s3 storage system being used. 
     IDname:   The name of the catgeory to search over for selecting shapes to subset to (e.g. 'RIVER')
     IDs:      The values of the category to select (e.g. ['Thames', 'Severn'])
     multifile:Are multiple files specfied in datafile? Set to 1 if so. In this case the files are read in
@@ -400,7 +402,7 @@ def catchment_subset_shapefile(data=None, datafile=None, multifile=0, sfname=Non
         else:
             data = xr.load_dataset(filein)
 
-    subset = add_shape_coord_from_data_array(data, sfname, IDname, IDs, yname, xname)
+    subset = add_shape_coord_from_data_array(data, sfname, endpoint, IDname, IDs, yname, xname)
     if drop == 0:
         subset = subset.where(subset[IDname]==1, other=np.nan)
     else:
@@ -411,7 +413,7 @@ def catchment_subset_shapefile(data=None, datafile=None, multifile=0, sfname=Non
 
 
 
-def add_shape_coord_from_data_array(xr_da, shp_path, IDname, IDs, latname, lonname):
+def add_shape_coord_from_data_array(xr_da, shp_path, endpoint, IDname, IDs, latname, lonname):
     """ Create a new coord for the xr_da indicating whether or not it 
     is inside the shapefile
     
@@ -424,7 +426,11 @@ def add_shape_coord_from_data_array(xr_da, shp_path, IDname, IDs, latname, lonna
     awash_da = precip_da.where(precip_da.awash==0, other=np.nan) 
     """
     # 1. read in shapefile
-    shp_gpd = gpd.read_file(shp_path)
+    if shp_path[:5] == "s3://":
+        s3 = s3fs.S3FileSystem(anon=True, endpoint_url=endpoint)
+        shp_gpd = gpd.read_file(s3.open(shp_path))
+    else:
+        shp_gpd = gpd.read_file(shp_path)
     
     # 2. create a list of tuples (shapely.geometry, id)
     #    this allows for many different polygons within a .shp file (e.g. States of US)
