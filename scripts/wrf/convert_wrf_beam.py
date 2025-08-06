@@ -1,4 +1,4 @@
-# MJB (UKCEH) Aug-2024
+ # MJB (UKCEH) Aug-2024
 # Example script for a pangeo-forge-recipe to convert
 # gridded netcdf files to a zarr datastore ready for upload
 # to object storage.
@@ -38,7 +38,7 @@ args, beam_args = parser.parse_known_args()
 file_path = args.configpath
 
 if len(sys.argv) != 2:
-   print("Usage: python scripts/convert_chess-met_beam.py <path_to_yaml_file>")
+   print("Usage: python scripts/convert_wrf_beam.py <path_to_yaml_file>")
    sys.exit(1)
    
 dotdotpath = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir))
@@ -57,23 +57,19 @@ if config.prune > 0:
 if not os.path.exists(config.target_root):
     os.makedirs(config.target_root)
 
-# chess-met_tas_gb_1km_daily_20171201-20171231.nc
-def make_path(variable, time):
-    #filename = config.prefix + time + config.suffix
-    #filename = "chess-met_" + variable + "_gb_1km_daily_" + time + ".nc"
-    #filename = f"chess-met_{variable}_gb_1km_daily_{time}.nc"
+# wrfout_d03_2019-10-12_00:00:00 
+def make_path(time):
     filename = config.filename
     filename = re.sub(r"{start_date}.*{end_date}", "{time}", filename)
     filename = re.sub(r"{start_date}", "{time}", filename)
     filename = re.sub(r"{time}", time, filename)
-    filename = re.sub(r"{varname}", variable, filename)
     
     print(f"FILENAME: {filename}")
     return os.path.join(config.input_dir, filename)
 
 #freq = 'M' # monthly hard coded for now
 #if freq == 'M':
-#    # smallest unit we can have represented in the timestring
+#    # smallest unit likely represented in the timestring
 #    # (one unit less than the file frequency)
 #    # e.g. hours for days, days for months, months for years
 #    delta = dt.timedelta(days=1)
@@ -90,33 +86,49 @@ def get_last_of_month(date: dt.datetime) -> dt.datetime:
     next_month = get_next_month(date)
     return next_month - dt.timedelta(days=next_month.day)
 
-def create_file_list(
+# this is the function that needs adapting 
+def create_time_list(
     start_date: dt.datetime,
     end_date: dt.datetime,
     time_pattern: str,
-    date_format: str = "%Y%m%d",
-) -> list[str]:
-    current = dt.datetime(start_date.year, start_date.month, start_date.day)
+    date_format: str,
+    freq: str) -> list[str]:
+    current = dt.datetime(start_date.year, start_date.month, start_date.day,
+                          start_date.hour, start_date.minute, start_date.second)
     times = []
     while current <= end_date:
-        start_of_month = current.replace(day=1)
-        next_month = get_next_month(current)
-        last_of_month = next_month - dt.timedelta(days=1)
-        file_name = time_pattern.format(
-            start_date=start_of_month.strftime(date_format),
-            end_date=last_of_month.strftime(date_format),
-        )
-        times.append(file_name)
-        current = next_month
+        start_of_period = current.replace(day=1, hour=0, minute=0, second=0)
+        if freq == 'M':
+            next_start = get_next_month(current)
+            end_of_period = next_start - dt.timedelta(days=1)
+        elif freq == 'D':
+            next_start = current + dt.timedelta(days=1)
+            end_of_period = next_start - dt.timedelta(hours=1)
+        if "{end_date}" in time_pattern:
+            time_string = time_pattern.format(
+                start_date=start_of_period.strftime(date_format),
+                end_date=end_of_period.strftime(date_format),
+            )
+        else:
+            time_string = time_pattern.format(
+                start_date=start_of_period.strftime(date_format)
+            )            
+        times.append(time_string)
+        current = next_start        
     return times
 
 if "{end_date}" in config.filename:
     time_pattern = re.search(r"{start_date}.*{end_date}", config.filename).group()
 else:
     time_pattern = "{start_date}"    
-start = dt.datetime(year=config.start_year, month=config.start_month, day=1)
-end = dt.datetime(year=config.end_year, month=config.end_month, day=get_last_of_month(dt.datetime(year=config.end_year, month=config.end_month, day=1)).day)
-times = create_file_list(start, end, time_pattern, date_format=config.date_format)
+start = dt.datetime(year=config.start_year, month=config.start_month, day=1,
+                    hour=0, second=0)
+end = dt.datetime(year=config.end_year, month=config.end_month, 
+                  day=get_last_of_month(dt.datetime(year=config.end_year, 
+                                                    month=config.end_month, 
+                                                    day=1)).day,
+                  hour=23, minute=59, second=59)
+times = create_time_list(start, end, time_pattern, date_format=config.date_format)
 print(times)
 
 time_concat_dim = ConcatDim("time", times)
