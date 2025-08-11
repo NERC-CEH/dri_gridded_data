@@ -86,7 +86,6 @@ def get_last_of_month(date: dt.datetime) -> dt.datetime:
     next_month = get_next_month(date)
     return next_month - dt.timedelta(days=next_month.day)
 
-# this is the function that needs adapting 
 def create_time_list(
     start_date: dt.datetime,
     end_date: dt.datetime,
@@ -131,10 +130,9 @@ end = dt.datetime(year=config.end_year, month=config.end_month,
 times = create_time_list(start, end, time_pattern, date_format=config.date_format)
 print(times)
 
-time_concat_dim = ConcatDim("time", times)
-var_merge_dim = MergeDim("variable", config.varnames)
+time_concat_dim = ConcatDim("XTIME", times)
 
-pattern = FilePattern(make_path, time_concat_dim, var_merge_dim)
+pattern = FilePattern(make_path, time_concat_dim)
 if config.prune > 0:
     pattern = pattern.prune(nkeep=config.prune)
 
@@ -282,6 +280,34 @@ class DataVarToCoordVar(beam.PTransform):
     
     def expand(self, pcoll: beam.PCollection) -> beam.PCollection:
         return pcoll | beam.Map(self._datavar_to_coordvar, self.chunkdims)
+    
+    
+# In this case to drop any variables not specified in the config file
+class DropVars(beam.PTransform):
+    
+    def __init__(self, keepvars):
+        super().__init__()
+        self.keepvars = keepvars
+    
+    @staticmethod
+    def _dropvars(item: Indexed[T], keepvars) -> Indexed[T]:
+        import numpy as np
+        index, ds = item
+        
+        # drop unwanted vars
+        dropvars = [var for var in ds.data_vars.keys() if not var in keepvars]
+        ds_trimmed = ds.drop_vars(dropvars)
+        
+        # drop dimensions that are now unnecessary
+        allvardims = [dim for varlist in [ds[var].dims for var in ds_trimmed.data_vars.keys()] for dim in varlist]
+        allvardims = list(np.unique(np.asarray(allvardims)))
+        dimstodrop = [dim for dim in ds_trimmed.dims.keys() if not dim in allvardims]
+        ds_trimmed = ds.drop_dims(dimstodrop)
+
+        return index, ds_trimmed
+    
+    def expand(self, pcoll: beam.PCollection) -> beam.PCollection:
+        return pcoll | beam.Map(self._dropvars, self.keepvars)
 
 # =============================================================================
 # Assemble the recipe (workflow) we want to run from the various building
@@ -292,6 +318,7 @@ recipe = (
         beam.Create(pattern.items())
         | OpenWithXarray(file_type=pattern.file_type)
         | CoordVarOverwrite(config, chunkdims, concdims, owfile)
+        | DropVars(config.varnames)
         | DataVarToCoordVar(chunkdims)
         | StoreToZarr(
             target_root=config.target_root,
