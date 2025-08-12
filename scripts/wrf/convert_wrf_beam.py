@@ -57,12 +57,12 @@ if config.prune > 0:
 if not os.path.exists(config.target_root):
     os.makedirs(config.target_root)
 
-# wrfout_d03_2019-10-12_00:00:00 
-def make_path(time):
+# e.g. wrfout_d03_2019-10-12_00:00:00 
+def make_path(Time):
     filename = config.filename
     filename = re.sub(r"{start_date}.*{end_date}", "{time}", filename)
     filename = re.sub(r"{start_date}", "{time}", filename)
-    filename = re.sub(r"{time}", time, filename)
+    filename = re.sub(r"{time}", Time, filename)
     
     print(f"FILENAME: {filename}")
     return os.path.join(config.input_dir, filename)
@@ -96,11 +96,12 @@ def create_time_list(
                           start_date.hour, start_date.minute, start_date.second)
     times = []
     while current <= end_date:
-        start_of_period = current.replace(day=1, hour=0, minute=0, second=0)
         if freq == 'M':
+            start_of_period = current.replace(day=1, hour=0, minute=0, second=0)            
             next_start = get_next_month(current)
             end_of_period = next_start - dt.timedelta(days=1)
         elif freq == 'D':
+            start_of_period = current.replace(hour=0, minute=0, second=0)
             next_start = current + dt.timedelta(days=1)
             end_of_period = next_start - dt.timedelta(hours=1)
         if "{end_date}" in time_pattern:
@@ -127,12 +128,14 @@ end = dt.datetime(year=config.end_year, month=config.end_month,
                                                     month=config.end_month, 
                                                     day=1)).day,
                   hour=23, minute=59, second=59)
-times = create_time_list(start, end, time_pattern, date_format=config.date_format)
+times = create_time_list(start, end, time_pattern, 
+                         date_format=config.date_format,
+                         freq=config.frequency)
 print(times)
 
-time_concat_dim = ConcatDim("XTIME", times)
+time_concat_dim = ConcatDim(config.concatdim, times)
 
-pattern = FilePattern(make_path, time_concat_dim)
+pattern = FilePattern(make_path, time_concat_dim, file_type=config.file_type)
 if config.prune > 0:
     pattern = pattern.prune(nkeep=config.prune)
 
@@ -302,12 +305,42 @@ class DropVars(beam.PTransform):
         allvardims = [dim for varlist in [ds[var].dims for var in ds_trimmed.data_vars.keys()] for dim in varlist]
         allvardims = list(np.unique(np.asarray(allvardims)))
         dimstodrop = [dim for dim in ds_trimmed.dims.keys() if not dim in allvardims]
-        ds_trimmed = ds.drop_dims(dimstodrop)
-
+        ds_trimmed = ds_trimmed.drop_dims(dimstodrop)
+        logging.info('Dropped vars: ')
+        logging.info(dropvars)
+        logging.info(dimstodrop)
         return index, ds_trimmed
     
     def expand(self, pcoll: beam.PCollection) -> beam.PCollection:
         return pcoll | beam.Map(self._dropvars, self.keepvars)
+    
+# In this case to rename the variable containing the concatenation coordinate
+# to be the same as the concatenation dimension
+class RenameConcatVar(beam.PTransform):
+    
+    def __init__(self, concatdim, concatvar):
+        super().__init__()
+        self.concatdim = concatdim
+        self.concatvar = concatvar
+    
+    @staticmethod
+    def _renameconcatvar(item: Indexed[T], concatdim, concatvar) -> Indexed[T]:
+        index, ds = item
+
+        if concatdim == concatvar:
+            logging.info('Concatenation dimension and variable names match, ' + 
+                         'no renaming needed')
+        else:            
+            # rename concat var to be same name as concat dim
+            ds = ds.rename({concatvar: concatdim})
+            
+            # make the new variable indexable
+            ds = ds.set_index({concatdim: concatdim})
+
+        return index, ds
+    
+    def expand(self, pcoll: beam.PCollection) -> beam.PCollection:
+        return pcoll | beam.Map(self._renameconcatvar, self.concatdim, self.concatvar)
 
 # =============================================================================
 # Assemble the recipe (workflow) we want to run from the various building
@@ -320,6 +353,7 @@ recipe = (
         | CoordVarOverwrite(config, chunkdims, concdims, owfile)
         | DropVars(config.varnames)
         | DataVarToCoordVar(chunkdims)
+        | RenameConcatVar(config.concatdim, config.concatvar)
         | StoreToZarr(
             target_root=config.target_root,
             store_name=config.store_name,
