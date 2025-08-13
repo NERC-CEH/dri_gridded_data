@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=fdri
 #SBATCH --partition standard
-#SBATCH --qos=standard
+#SBATCH --qos=high
 #SBATCH --time=23:59:59
 #SBATCH --mem=500GB
 #SBATCH -n 1

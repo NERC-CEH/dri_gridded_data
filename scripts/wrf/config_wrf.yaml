@@ -1,5 +1,5 @@
 start_year: 2019
-end_year: 2019
+end_year: 2020
 start_month: 1
 end_month: 12
 frequency: "D" # file frequency. Currently supports "M" for monthly files, "D" for daily
@@ -16,7 +16,7 @@ varnames:
   - "RAINNC"
 date_format: "%Y-%m-%d_%H:%M:%S" # use python datestring formatting codes https://docs.python.org/3/library/datetime.html#format-codes
 target_root: "/work/scratch-nopw2/mattjbr"
-store_name: "EMEP4UK_WRFv4-4-2_SEASIA_2019.zarr"
+store_name: "EMEP4UK_WRFv4-4-2_SEASIA_2019-2020.zarr"
 concatdim: "Time" # name of the dimension that the individual files will be concatenated along. Usually "time". Note this is separate to the merging of variables stored in separate files, which is handled by varnames
 concatvar: "XTIME" # name of the VARIABLE that contains the time coordinates in each file, used for the concatenation. Usually it is the same as concatdim. 
 target_chunks: 
@@ -24,7 +24,7 @@ target_chunks:
   south_north: 3
   west_east: 3
 num_workers: 1 # above 1 is experimental...
-prune: 32 # no. of files to process, set to 0 to use all
+prune: 0 # no. of files to process, set to 0 to use all
 overwrites: "off" # "on" or "off"
 var_overwrites:
 #  - "lat"
