@@ -1,7 +1,8 @@
-# Run
-```
-uv run scripts/chess-met/convert_chess-met_beam.py scripts/chess-met/config_chessmet.yaml
-```
+# Datasets
+This repository contains scripts for converting the following datasets, downloadable from the EIDC:
+- [CHESS-met, E.L. Robinson, E.M. Blyth et al.](https://doi.org/10.5285/835a50df-e74f-4bfb-b593-804fd61d5eab)
+- [GEAR(hourly), E. Lewis, N. Quinn et al. ](https://doi.org/10.5285/fc9423d6-3d54-467f-bb2b-fc7357a3941f)
+- [GEAR(daily), M. Tanguy, H. Dixon et al.](https://doi.org/10.5285/dbf13dd5-90cd-457a-a986-f2f9dd97e93c)
 
 # DRI Gridded Data
 
