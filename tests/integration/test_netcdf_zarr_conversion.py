@@ -1,5 +1,6 @@
 import pytest
 import xarray as xr
+from xarray.testing import assert_allclose
 import tempfile
 import shutil
 from pathlib import Path
@@ -33,3 +34,9 @@ def test_convert_chessmet():
         zarr_dataset: xr.Dataset = xr.open_zarr(temp_zarr, consolidated=False)
         for dimension in netcdf_dataset.sizes:
             assert netcdf_dataset.sizes[dimension] == zarr_dataset.sizes[dimension]
+
+        vars_to_drop = set(zarr_dataset.coords) - set(netcdf_dataset.coords)
+        zarr_dataset = zarr_dataset.drop_vars(vars_to_drop, errors="ignore")
+
+        variable_name: str = "dtr"
+        assert_allclose(netcdf_dataset[variable_name], zarr_dataset[variable_name])
