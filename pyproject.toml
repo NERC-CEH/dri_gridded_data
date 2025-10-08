@@ -19,6 +19,16 @@ build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [
+    "pytest>=8.4.2",
     "ruff>=0.13.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+markers = [
+    "integration: integration tests of conversion scripts",
+    "slow: marks tests as slow",
+    "unit: marks tests as unit tests",
 ]
 

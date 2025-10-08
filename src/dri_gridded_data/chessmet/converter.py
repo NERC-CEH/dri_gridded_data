@@ -22,7 +22,7 @@ from pangeo_forge_recipes.transforms import (
     T,
 )
 from pangeo_forge_recipes.types import Indexed
-from dri_gridded_data.GEAR_config import Config
+from dri_gridded_data.utils import Config
 
 # freq = 'M' # monthly hard coded for now
 # if freq == 'M':

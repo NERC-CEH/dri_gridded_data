@@ -1,6 +1,6 @@
 import argparse
 from dri_gridded_data.chessmet.converter import convert_chessmet
-from dri_gridded_data.GEAR_config import load_yaml_config
+from dri_gridded_data.utils import load_yaml_config
 
 parser = argparse.ArgumentParser()
 parser.add_argument("configpath", type=str, help="Path to the configuration file")
