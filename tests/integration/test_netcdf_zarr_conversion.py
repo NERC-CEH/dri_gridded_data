@@ -5,7 +5,7 @@ import tempfile
 import shutil
 from pathlib import Path
 from dri_gridded_data.chessmet.converters import convert_chessmet
-from dri_gridded_data.gear.converters import conver_gear_hourly
+from dri_gridded_data.gear.converters import convert_gear_hourly, convert_gear_daily
 from dri_gridded_data.utils import Config
 from typing import Dict, Any, Callable
 
@@ -69,7 +69,7 @@ def test_convert_chessmet():
     }
 
     _run_conversion_test(
-        "data/chess-met/chess-met_dtr_gb_1km_daily_20191201-20191231.nc",
+        "data-tiny/chess-met/chess-met_dtr_gb_1km_daily_20191201-20191231.nc",
         config_params,
         convert_chessmet,
         "dtr",
@@ -77,7 +77,6 @@ def test_convert_chessmet():
 
 
 @pytest.mark.integration
-@pytest.mark.slow
 def test_convert_gear_hourly():
     config_params = {
         "start_year": 2016,
@@ -93,8 +92,31 @@ def test_convert_gear_hourly():
     }
 
     _run_conversion_test(
-        "data/gear-hourly/CEH-GEAR-1hr-v2_201612.nc",
+        "data-tiny/gear-hourly/CEH-GEAR-1hr-v2_201612.nc",
         config_params,
-        conver_gear_hourly,
+        convert_gear_hourly,
+        "rainfall_amount",
+    )
+
+
+@pytest.mark.integration
+def test_convert_gear_daily():
+    config_params = {
+        "start_year": 2019,
+        "end_year": 2019,
+        "start_month": 1,
+        "end_month": 1,
+        "prefix": "CEH_GEAR_daily_GB_",
+        "suffix": ".nc",
+        "store_name": "geardaily_fulloutput_yearly_100km_chunks.zarr",
+        "target_chunks": {"time": 360, "y": 100, "x": 100},
+        "num_workers": 1,
+        "prune": 0,
+    }
+
+    _run_conversion_test(
+        "data-tiny/gear-daily/CEH_GEAR_daily_GB_2019.nc",
+        config_params,
+        convert_gear_daily,
         "rainfall_amount",
     )
