@@ -73,3 +73,14 @@ All scripts should now be runnable using `uv run` e.g.:
 ```
 uv run scripts/<CONVERSION_SCRIPT.py> <CONFIG_FILE.yaml>
 ```
+## Tests
+There are a set of integration tests (marked as `@pytest.mark.integration`) that can be run using:
+```
+uv run pytest -m integration
+```
+
+### Generating test data
+Test data used by the unit (integration) tests lives in `tests/data`. This data can be (re)generated using the script `scripts/generate_test_data.py` and handing it a specific sample file:
+```
+uv run chess-met_dtr_gb_1km_daily_20191201-20191231.nc
+```
