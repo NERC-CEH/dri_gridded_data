@@ -14,13 +14,13 @@ class TargetChunks:
 @dataclass
 class Config:
     input_dir: str
-    filename: str
-    varnames: list
     target_root: str
     store_name: str
     start_year: int
     end_year: int
     target_chunks: TargetChunks
+    filename: Optional[str] = ""
+    varnames: Optional[list] = field(default_factory=list)
     date_format: str = "%Y%m%d"
     start_month: int = 1
     end_month: int = 12
@@ -29,6 +29,8 @@ class Config:
     overwrites: Optional[str] = "off"
     var_overwrites: Optional[list] = field(default_factory=list)
     overwrite_source: Optional[str] = ""
+    prefix: Optional[str] = ""
+    suffix: Optional[str] = ""
 
 
 def load_yaml_config(file_path: str) -> Config:
