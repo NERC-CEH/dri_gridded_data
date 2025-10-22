@@ -6,3 +6,4 @@ data/
 __pycache__
 config/*
 !config/default.yaml
+.env
