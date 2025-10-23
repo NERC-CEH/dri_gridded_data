@@ -74,13 +74,21 @@ All scripts should now be runnable using `uv run` e.g.:
 uv run scripts/<CONVERSION_SCRIPT.py> <CONFIG_FILE.yaml>
 ```
 ## Tests
+### Downloading and preparing test data
+The package contains integration tests for test the various converters on the datasets listed above. These tests use real samples of the datasets that must be first downloaded and prepared using the `scripts/download_test_data.py`. To download you must have access login to download the above datasets on the EIDC and then create a `.env` file containing your login details:
+```
+username=YOUR_USERNAME
+password=YOUR_PASSWORD
+```
+You can then run:
+```
+uv run scripts/download_test_data.py
+```
+This will download a test file for each dataset and place them in `data/`. It will also create smaller sub-samples from these files and add them to `data-tiny/` - these will be used by the integration tests.
+### Running tests
 There are a set of integration tests (marked as `@pytest.mark.integration`) that can be run using:
 ```
 uv run pytest -m integration
 ```
-
-### Generating test data
-Test data used by the unit (integration) tests lives in `tests/data`. This data can be (re)generated using the script `scripts/generate_test_data.py` and handing it a specific sample file:
-```
-uv run chess-met_dtr_gb_1km_daily_20191201-20191231.nc
-```
+These tests will convert using the recipes defined for each dataset and then check that the resulting output is as expected.
+> **Note:** These integration tests can also be run with the full file samples, but this may take several minutes to run.
