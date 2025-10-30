@@ -2,9 +2,9 @@
 #SBATCH --account=fdri
 #SBATCH --partition standard
 #SBATCH --qos=high
-#SBATCH --time=23:59:59
-#SBATCH --mem=750GB
-#SBATCH -n 1
+#SBATCH --time=22:59:00
+#SBATCH --mem=350GB
+#SBATCH -n 8
 #SBATCH -o %J.out
 #SBATCH -e %J.err
 

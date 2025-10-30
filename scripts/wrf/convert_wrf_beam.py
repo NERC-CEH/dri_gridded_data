@@ -41,10 +41,10 @@ if len(sys.argv) != 2:
    print("Usage: python scripts/convert_wrf_beam.py <path_to_yaml_file>")
    sys.exit(1)
    
-dotdotpath = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir))
-sys.path.append(dotdotpath)
+#dotdotpath = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir))
+#sys.path.append(dotdotpath)
 from GEAR_config import load_yaml_config
-sys.path.remove(dotdotpath)
+#sys.path.remove(dotdotpath)
 
 config = load_yaml_config(file_path)
 
