@@ -67,15 +67,12 @@ def make_path(Time):
     print(f"FILENAME: {filename}")
     return os.path.join(config.input_dir, filename)
 
-#freq = 'M' # monthly hard coded for now
+#freq = 'M' 
 #if freq == 'M':
 #    # smallest unit likely represented in the timestring
 #    # (one unit less than the file frequency)
 #    # e.g. hours for days, days for months, months for years
 #    delta = dt.timedelta(days=1)
-
-# hardcoded for monthly file frequency for now
-# could be generalised in the future
 def get_next_month(date: dt.datetime) -> dt.datetime:
     if date.month == 12:
         return date.replace(year=date.year + 1, month=1, day=1)
@@ -113,8 +110,18 @@ def create_time_list(
             time_string = time_pattern.format(
                 start_date=start_of_period.strftime(date_format)
             )            
-        times.append(time_string)
-        current = next_start        
+        # check skips
+        skipswitch = 0
+        for skipdate in config.skipdates:
+            if skipdate in time_string:
+                skipswitch = 1
+                logging.info('Skipping ' + time_string + ' because of specified skipdate: ' + skipdate)
+                break
+        if skipswitch == 1:
+            pass
+        else:
+            times.append(time_string)
+        current = next_start
     return times
 
 if "{end_date}" in config.filename:
