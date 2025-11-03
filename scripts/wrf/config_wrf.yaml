@@ -1,5 +1,5 @@
 start_year: 1960
-end_year: 2020
+end_year: 1965
 start_month: 1
 end_month: 12
 frequency: "D" # file frequency. Currently supports "M" for monthly files, "D" for daily
@@ -52,7 +52,7 @@ skipdates: # skip files the following dates in their filenames, YYYY-MM-DD
   - "2017"
   - "2018"
   - "2019"
-input_dir: "/work/scratch-nopw2/mattjbr"
+input_dir: "/gws/ssde/j25b/ceh_generic/matbro/WRF/dataset3"
 filename: "wrfout_d03_{start_date}"
 #file_type: "netcdf3" # only needed if the files are not netcdf4 (most now are)
 varnames:
@@ -67,7 +67,7 @@ varnames:
   - "GLW"
 date_format: "%Y-%m-%d_%H:%M:%S" # use python datestring formatting codes https://docs.python.org/3/library/datetime.html#format-codes
 target_root: "/work/scratch-nopw2/mattjbr"
-store_name: "EMEP4UK_WRFv4-4-2_SEASIA_2020.zarr"
+store_name: "test.zarr"
 concatdim: "Time" # name of the dimension that the individual files will be concatenated along. Usually "time". Note this is separate to the merging of variables stored in separate files, which is handled by varnames
 concatvar: "XTIME" # name of the VARIABLE that contains the time coordinates in each file, used for the concatenation. Usually it is the same as concatdim. 
 target_chunks: 
