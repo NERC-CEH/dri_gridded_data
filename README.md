@@ -20,7 +20,7 @@ Currently the product has been designed for datasets stored in monthly netcdf fi
 
 ## Config
 
-The config files contain the following user-configurable variables:
+The config files in the "config" folder contain the following user-configurable variables:
 -  `start_year`: The year of the first file in the dataset (YYYY)
 -  `start_month`: The month of the first file in the dataset (MM)
 -  `end_year`: The year of the last file in the dataset (YYYY)
