@@ -353,7 +353,6 @@ class RenameConcatVar(beam.PTransform):
 # Assemble the recipe (workflow) we want to run from the various building
 # blocks we have from pangeo-forge-recipes and our own preprocess building
 # blocks defined above
-sys.exit()
 recipe = (
         beam.Create(pattern.items())
         | OpenWithXarray(file_type=pattern.file_type)

@@ -3,8 +3,8 @@
 #SBATCH --partition standard
 #SBATCH --qos=high
 #SBATCH --time=22:59:00
-#SBATCH --mem=350GB
-#SBATCH -n 8
+#SBATCH --mem=498GB
+#SBATCH -n 16
 #SBATCH -o %J.out
 #SBATCH -e %J.err
 
