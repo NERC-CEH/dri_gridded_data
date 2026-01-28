@@ -1,3 +1,9 @@
+# Datasets
+This repository contains scripts for converting the following datasets, downloadable from the EIDC:
+- [CHESS-met, E.L. Robinson, E.M. Blyth et al.](https://doi.org/10.5285/835a50df-e74f-4bfb-b593-804fd61d5eab)
+- [GEAR(hourly), E. Lewis, N. Quinn et al. ](https://doi.org/10.5285/fc9423d6-3d54-467f-bb2b-fc7357a3941f)
+- [GEAR(daily), M. Tanguy, H. Dixon et al.](https://doi.org/10.5285/dbf13dd5-90cd-457a-a986-f2f9dd97e93c)
+
 # DRI Gridded Data
 
 DRI Gridded Data Repository. Work in progress. The idea with this repo is to develop a suite of tools to make working with large gridded datasets easier. This is outlined in the [diagram](https://github.com/NERC-CEH/dri_gridded_data/blob/main/img/gridded_data_tools_workflow_diagram.png) below. The background colours represent the progress of the work. Green = Completed for now, Yellow = Actively being worked on, Red = Not started. 
@@ -54,3 +60,35 @@ The config files contain the following user-configurable variables:
 # Disclaimer
 
 THIS REPOSITORY IS PROVIDED THE AUTHORS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHORS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS REPOSITORY, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+# UV Setup
+> Note: The python version is pinned to `3.10` as `pyarrow` cannot currently be built with later versions ([Stackoverflow discussion](https://stackoverflow.com/a/77318636)). Additionally there are import issues with `zarr` `FSSpec`.
+
+To run the scripts in this repository using `uv`, first download and install using the instructions in the [Astral documentation](https://docs.astral.sh/uv/getting-started/installation/). Once installed, run the following commands to download all dependencies and create a virtual environment:
+```
+uv sync
+uv venv
+```
+All scripts should now be runnable using `uv run` e.g.:
+```
+uv run scripts/<CONVERSION_SCRIPT.py> <CONFIG_FILE.yaml>
+```
+## Tests
+### Downloading and preparing the data
+The package contains integration tests for the various converters of the datasets listed above. These tests use real samples of the datasets that must first downloaded and prepared using `scripts/download_test_data.py`. To run, you must have login access to download the above datasets on the EIDC and then create a `.env` file containing your login details:
+```
+username=YOUR_USERNAME
+password=YOUR_PASSWORD
+```
+You can then run:
+```
+uv run scripts/download_test_data.py
+```
+This will download a test file for each dataset and place them in `data/`. It will also create sub-samples from these files and add them to `data-tiny/` - these will be used by the integration tests.
+### Running tests
+There are a set of integration tests (marked as `@pytest.mark.integration`) that can be run using:
+```
+uv run pytest -m integration
+```
+These tests will convert using the recipes defined for each dataset and then check that the resulting output is as expected.
+> **Note:** These integration tests can also be run with the full file samples, but this may take several minutes.
