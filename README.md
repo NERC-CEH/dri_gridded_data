@@ -18,19 +18,6 @@ Currently the product has been designed for datasets stored in monthly netcdf fi
 
 [Product description document](https://cehacuk.sharepoint.com/:w:/s/FDRI-WP2Digital/EbX7pJCS6alKrckL_jU-Dd8B41KHJYWzEYN27qGHkWXL7w?e=8gnEbc)
 
-## Local installation
-
-- Download local copy of repository: `git clone git@github.com:NERC-CEH/dri_gridded_data.git`
-- Create a conda environment from the environment.yml file: `conda create --name dri_gridded_data --file environment.yml`
-
-## Structure
-
-- Currently all the action takes place in the 'scripts' folder
-- Within the scripts folder there is a folder for each dataset that has been converted
-- Within each dataset's folder there is at least: a config file (yaml format) and a python script which runs the conversion process.
-
-So there is currently one script for each dataset, however the latest script, which is currently the script for *chess-met*, is able to process the other datasets and any future datasets for which no further functionality is required (i.e. it is backwards-compatible with datasets processed earlier in the development process) Future work intends to just have one conversion script that works for all datasets, and just config files for the datasets. 
-
 ## Config
 
 The config files contain the following user-configurable variables:
@@ -38,12 +25,17 @@ The config files contain the following user-configurable variables:
 -  `start_month`: The month of the first file in the dataset (MM)
 -  `end_year`: The year of the last file in the dataset (YYYY)
 -  `end_month`: The month of the last file in the dataset (MM)
+-  `frequency`: The file frequency, currently supports "M" (for monthly files) and "D" (for daily files). 
+-  `skipdates`: Optional. A list of dates to skip and not include in the conversion. Files with the listed dates (YYYY, YYYY-MM or YYYY-MM-DD) will be skipped.
 -  `input_dir`: The path to the directory/folder containing the dataset files
 -  `filename`: A template for the filenames of the files, containing {varname} to substitute for varnames, {start_date} for a timestamp and optionally {end_date} for a second timestamp (e.g. if there is a range in the filename)
+-  `filetype`: Optional. Type of netcdf files input. Only needed if the files are not netcdf4 (most now are), in which case use "netcdf3"
 -  `varnames`: A list of all the variable names in the dataset. Currently the variable names in the filenames have to be the same as the variable names in the netcdf files.
 -  `date_format`: A [python datestring format code](https://docs.python.org/3/library/datetime.html#format-codes) that represents the format of {start_date} (and {end_date} if present) in the filename 
 -  `target_root`: The path to the folder in which to store the output zarr dataset
 -  `store_name`: The name of the output zarr dataset
+-  `concatdim`: The name of the dimension that the individual files will be concatenated along. Usually "time". Note this is separate to the merging of variables stored in separate files, wh
+ich is handled by varnames
 -  `target_chunks`: A dictionary with the dimension names of the desired output dataset chunking as the keys and size of these dimensions as the values
 -  `num_workers`: Number of workers to use in the computation of the new dataset. Note that anything above 1 is currently experimental and may fail for weird reasons
 -  `prune`: Used for testing. Instead of running with all the dataset's files, just use the first X
@@ -51,17 +43,7 @@ The config files contain the following user-configurable variables:
 -  `var_overwrites`: Optional. Which variables in the dataset to overwrite. If not specified and `overwrites` is "on", all variables that can be safely overwritten are
 -  `overwrite_source`: Optional. Filename of a file in the dataset to use to source the variables' data to use to overwrite. If not specified and `overwrites` is "on", the last file of the dataset is used. 
 
-## Running instructions
-
-- The python conversion scripts take in the config file as their only argument so to run one:
-- `ipython path/to/convert/script.py path/to/config/file.yaml`
-- Memory usage can be an issue for datasets >=O(100GB), due to the usage of Beam's rough-and-ready 'Direct Runner', which is not designed for operational use. Usage of an HPC is recommended for such datasets. An example batch job submission script for SLURM-based HPCs is available in the 'chess-met' folder.
-
-# Disclaimer
-
-THIS REPOSITORY IS PROVIDED THE AUTHORS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHORS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS REPOSITORY, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-# UV Setup
+# UV Setup and running instructions
 > Note: The python version is pinned to `3.10` as `pyarrow` cannot currently be built with later versions ([Stackoverflow discussion](https://stackoverflow.com/a/77318636)). Additionally there are import issues with `zarr` `FSSpec`.
 
 To run the scripts in this repository using `uv`, first download and install using the instructions in the [Astral documentation](https://docs.astral.sh/uv/getting-started/installation/). Once installed, run the following commands to download all dependencies and create a virtual environment:
@@ -73,6 +55,10 @@ All scripts should now be runnable using `uv run` e.g.:
 ```
 uv run scripts/<CONVERSION_SCRIPT.py> <CONFIG_FILE.yaml>
 ```
+
+> Note: Memory usage can be an issue for datasets >=O(100GB), due to the usage of Beam's rough-and-ready 'Direct Runner', which is not designed for operational use. Usage of an HPC is recommended for such datasets.
+
+
 ## Tests
 ### Downloading and preparing the data
 The package contains integration tests for the various converters of the datasets listed above. These tests use real samples of the datasets that must first downloaded and prepared using `scripts/download_test_data.py`. To run, you must have login access to download the above datasets on the EIDC and then create a `.env` file containing your login details:
@@ -85,6 +71,7 @@ You can then run:
 uv run scripts/download_test_data.py
 ```
 This will download a test file for each dataset and place them in `data/`. It will also create sub-samples from these files and add them to `data-tiny/` - these will be used by the integration tests.
+
 ### Running tests
 There are a set of integration tests (marked as `@pytest.mark.integration`) that can be run using:
 ```
@@ -92,3 +79,8 @@ uv run pytest -m integration
 ```
 These tests will convert using the recipes defined for each dataset and then check that the resulting output is as expected.
 > **Note:** These integration tests can also be run with the full file samples, but this may take several minutes.
+
+
+# Disclaimer
+
+THIS REPOSITORY IS PROVIDED THE AUTHORS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHORS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS REPOSITORY, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
