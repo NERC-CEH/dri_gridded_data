@@ -1,6 +1,6 @@
 import argparse
 from dri_gridded_data.chessmet.converters import convert_chessmet
-from dri_gridded_data.gear.converters import conver_gear_hourly
+from dri_gridded_data.gear.converters import convert_gear_hourly
 from dri_gridded_data.utils import load_yaml_config
 
 parser = argparse.ArgumentParser()
