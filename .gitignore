@@ -5,6 +5,4 @@ data/
 data-tiny/
 *~
 __pycache__
-config/*
-!config/default.yaml
 .env
