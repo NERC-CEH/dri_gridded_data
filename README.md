@@ -18,9 +18,24 @@ Currently the product has been designed for datasets stored in monthly netcdf fi
 
 [Product description document](https://cehacuk.sharepoint.com/:w:/s/FDRI-WP2Digital/EbX7pJCS6alKrckL_jU-Dd8B41KHJYWzEYN27qGHkWXL7w?e=8gnEbc)
 
+## UV Setup and running instructions
+> Note: The python version is pinned to `3.10` as `pyarrow` cannot currently be built with later versions ([Stackoverflow discussion](https://stackoverflow.com/a/77318636)). Additionally there are import issues with `zarr` `FSSpec`.
+
+To run the scripts in this repository using `uv`, first download and install using the instructions in the [Astral documentation](https://docs.astral.sh/uv/getting-started/installation/). Once installed, run the following commands to download all dependencies and create a virtual environment:
+```
+uv sync
+uv venv
+```
+All scripts should now be runnable using `uv run` e.g.:
+```
+uv run scripts/convert.py <CONFIG_FILE.yaml>
+```
+
+> Note: Memory usage can be an issue for datasets >=O(100GB), due to the usage of Beam's rough-and-ready 'Direct Runner', which is not designed for operational use. Usage of an HPC is recommended for such datasets.
+
 ## Config
 
-The config files in the "config" folder contain the following user-configurable variables:
+Example config files can be found in the "config" folder and contain the following user-configurable variables:
 -  `start_year`: The year of the first file in the dataset (YYYY)
 -  `start_month`: The month of the first file in the dataset (MM)
 -  `end_year`: The year of the last file in the dataset (YYYY)
@@ -42,21 +57,6 @@ ich is handled by varnames
 -  `overwrites`: "off" or "on". Whether or not to overwrite one or more of the dataset's variables with data from one of the dataset's files. Designed for coordinate variables that may differ slightly between different version of the dataset
 -  `var_overwrites`: Optional. Which variables in the dataset to overwrite. If not specified and `overwrites` is "on", all variables that can be safely overwritten are
 -  `overwrite_source`: Optional. Filename of a file in the dataset to use to source the variables' data to use to overwrite. If not specified and `overwrites` is "on", the last file of the dataset is used. 
-
-# UV Setup and running instructions
-> Note: The python version is pinned to `3.10` as `pyarrow` cannot currently be built with later versions ([Stackoverflow discussion](https://stackoverflow.com/a/77318636)). Additionally there are import issues with `zarr` `FSSpec`.
-
-To run the scripts in this repository using `uv`, first download and install using the instructions in the [Astral documentation](https://docs.astral.sh/uv/getting-started/installation/). Once installed, run the following commands to download all dependencies and create a virtual environment:
-```
-uv sync
-uv venv
-```
-All scripts should now be runnable using `uv run` e.g.:
-```
-uv run scripts/<CONVERSION_SCRIPT.py> <CONFIG_FILE.yaml>
-```
-
-> Note: Memory usage can be an issue for datasets >=O(100GB), due to the usage of Beam's rough-and-ready 'Direct Runner', which is not designed for operational use. Usage of an HPC is recommended for such datasets.
 
 
 ## Tests
