@@ -28,8 +28,10 @@ uv venv
 ```
 All scripts should now be runnable using `uv run` e.g.:
 ```
-uv run scripts/convert.py <CONFIG_FILE.yaml>
+uv run scripts/convert.py <datasetname> <CONFIG_FILE.yaml>
 ```
+
+```datasetname``` can currently be one of "chess", "gearh" or "wrf". 
 
 > Note: Memory usage can be an issue for datasets >=O(100GB), due to the usage of Beam's rough-and-ready 'Direct Runner', which is not designed for operational use. Usage of an HPC is recommended for such datasets.
 
