@@ -20,4 +20,4 @@ export PATH=/home/users/mattjbr/.local/bin:$PATH
 cd /gws/nopw/j04/fdri/users/matbro/dri_gridded_data/scripts
 
 # run
-uv run convert.py wrf ../config/config_wrf.yaml
+uv run convert.py wrf ../config/wrf_config.yaml
