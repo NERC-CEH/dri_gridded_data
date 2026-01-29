@@ -21,7 +21,7 @@ Currently the product has been designed for datasets stored in monthly netcdf fi
 ## UV Setup and running instructions
 > Note: The python version is pinned to `3.10` as `pyarrow` cannot currently be built with later versions ([Stackoverflow discussion](https://stackoverflow.com/a/77318636)). Additionally there are import issues with `zarr` `FSSpec`.
 
-To run the scripts in this repository using `uv`, first download and install using the instructions in the [Astral documentation](https://docs.astral.sh/uv/getting-started/installation/). Once installed, run the following commands to download all dependencies and create a virtual environment:
+To run the scripts in this repository using `uv`, first download and install using the instructions in the [Astral documentation](https://docs.astral.sh/uv/getting-started/installation/). Once installed, enter the directory containing the code and run the following commands to download all dependencies and create a virtual environment:
 ```
 uv sync
 uv venv
