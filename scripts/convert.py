@@ -13,7 +13,7 @@ args, beam_args = parser.parse_known_args()
 
 config = load_yaml_config(args.configpath)
 
-converters = {"chess": convert_chessmet, "gearh": conver_gear_hourly}
+converters = {"chess": convert_chessmet, "gearh": convert_gear_hourly}
 
 convert_func = converters[args.dataset]
 convert_func(config)
