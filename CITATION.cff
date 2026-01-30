@@ -1,0 +1,42 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: Gridded Dataset converter
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Matt
+    family-names: Dalle Piagge
+    email: matbro@ceh.ac.uk
+    affiliation: UKCEH
+    orcid: 'https://orcid.org/0000-0003-1127-0279'
+  - given-names: Matthew
+    family-names: Coole
+    email: matcoo@ceh.ac.uk
+    affiliation: UKCEH
+    orcid: 'https://orcid.org/0000-0002-9279-931X'
+identifiers:
+  - type: url
+    value: 'https://github.com/NERC-CEH/dri_gridded_data'
+abstract: >-
+  A tool aimed at making the conversion of netcdf datasets
+  to Zarr simpler and easier. Input some config about your
+  dataset and press go, is the idea, though it's probably
+  not quite there yet. Based on pangeo-forge-recipes and
+  Apache Beam. 
+keywords:
+  - data
+  - dataset
+  - netcdf
+  - Zarr
+  - pangeo
+  - pangeo-forge-recipes
+  - Beam
+  - object storage
+  - FDRI
+  - DRI
+  - Digital Research Infrastructure
+license: BSD-3-Clause
