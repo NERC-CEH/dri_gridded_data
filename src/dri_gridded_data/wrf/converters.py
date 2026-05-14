@@ -64,11 +64,12 @@ def create_time_list(
             )            
         # check skips
         skipswitch = 0
-        for skipdate in skipdates:
-            if skipdate in time_string:
-                skipswitch = 1
-                logging.info('Skipping ' + time_string + ' because of specified skipdate: ' + skipdate)
-                break
+        if skipdates:
+            for skipdate in skipdates:
+                if skipdate in time_string:
+                    skipswitch = 1
+                    logging.info('Skipping ' + time_string + ' because of specified skipdate: ' + skipdate)
+                    break
         if skipswitch == 1:
             pass
         else:
@@ -202,8 +203,8 @@ class DataVarToCoordVar(beam.PTransform):
         vars_to_coord = []
         for key in ds.data_vars.keys():  # go through all the *data* variables
             ndims = len(ds[key].shape)
-            if ndims != nchunkdims:  # rule out the main dataset variable(s)
-                if key not in chunkdims:  # rule out the coord vars chunked over
+            if ndims != nchunkdims:  # rule out the main dataset variable(s) TODO: Fix 2D main data var case?
+                if key not in chunkdims:  # rule out the coord vars chunked over 
                     logging.info("Converting " + key + " to coordinate variable")
                     vars_to_coord.append(key)
         ds = ds.set_coords(vars_to_coord)    
@@ -228,16 +229,21 @@ class DropVars(beam.PTransform):
         
         # drop unwanted vars
         dropvars = [var for var in ds.data_vars.keys() if not var in keepvars]
-        ds_trimmed = ds.drop_vars(dropvars)
+        if len(dropvars) > 0:
+            ds_trimmed = ds.drop_vars(dropvars)
         
-        # drop dimensions that are now unnecessary
-        allvardims = [dim for varlist in [ds[var].dims for var in ds_trimmed.data_vars.keys()] for dim in varlist]
-        allvardims = list(np.unique(np.asarray(allvardims)))
-        dimstodrop = [dim for dim in ds_trimmed.dims.keys() if not dim in allvardims]
-        ds_trimmed = ds_trimmed.drop_dims(dimstodrop)
-        logging.info('Dropped vars: ')
-        logging.info(dropvars)
-        logging.info(dimstodrop)
+            # drop dimensions that are now unnecessary
+            allvardims = [dim for varlist in [ds[var].dims for var in ds_trimmed.data_vars.keys()] for dim in varlist]
+            allvardims = list(np.unique(np.asarray(allvardims)))
+            dimstodrop = [dim for dim in ds_trimmed.dims.keys() if not dim in allvardims]
+            ds_trimmed = ds_trimmed.drop_dims(dimstodrop)
+            logging.info('Dropped vars: ')
+            logging.info(dropvars)
+            logging.info(dimstodrop)
+        else:
+            logging.info('No vars or dims dropped')
+            ds_trimmed = ds
+            
         return index, ds_trimmed
     
     def expand(self, pcoll: beam.PCollection) -> beam.PCollection:
@@ -296,14 +302,27 @@ def convert_wrf(config: Config):
     if not os.path.exists(config.target_root):
         os.makedirs(config.target_root)
 
-    def make_path(Time):
-        filename = config.filename
-        filename = re.sub(r"{start_date}.*{end_date}", "{time}", filename)
-        filename = re.sub(r"{start_date}", "{time}", filename)
-        filename = re.sub(r"{time}", Time, filename)
-        
-        print(f"FILENAME: {filename}")
-        return os.path.join(config.input_dir, filename)
+    ## TODO: Got to be a better way of doing matching the config arg to the function arg name...
+    if config.concatdim == "Time":
+        def make_path(Time):
+            filename = config.filename
+            filename = re.sub(r"{start_date}.*{end_date}", "{time}", filename)
+            filename = re.sub(r"{start_date}", "{time}", filename)
+            filename = re.sub(r"{time}", Time, filename)
+            
+            print(f"FILENAME: {filename}")
+            return os.path.join(config.input_dir, filename)
+    elif config.concatdim == 'time':
+        def make_path(time):
+            filename = config.filename
+            filename = re.sub(r"{start_date}.*{end_date}", "{time}", filename)
+            filename = re.sub(r"{start_date}", "{time}", filename)
+            filename = re.sub(r"{time}", time, filename)
+            
+            print(f"FILENAME: {filename}")
+            return os.path.join(config.input_dir, filename)
+    else:
+        raise TypeError("concatdim other than Time or time is not supported")
 
     if "{end_date}" in config.filename:
         time_pattern = re.search(r"{start_date}.*{end_date}", config.filename).group()
@@ -368,8 +387,8 @@ def convert_wrf(config: Config):
         beam.Create(pattern.items())
         | OpenWithXarray(file_type=pattern.file_type)
         | CoordVarOverwrite(config, chunkdims, concdims, owfile)
-        | DropVars(config.varnames)
         | DataVarToCoordVar(chunkdims)
+        | DropVars(config.varnames)        
         | RenameConcatVar(config.concatdim, config.concatvar)
         | StoreToZarr(
             target_root=config.target_root,

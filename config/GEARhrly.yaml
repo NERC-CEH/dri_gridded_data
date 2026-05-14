@@ -2,15 +2,25 @@ start_year: 1990
 end_year: 2016
 start_month: 1
 end_month: 12
-input_dir: "/home/users/mattjbr/fdri/data/gear-hrly"
-prefix: "CEH-GEAR-1hr-v2_"
-suffix: ".nc"
-target_root: "/work/scratch-pw2/mattjbr"
-store_name: "gearhrly_fulloutput_15day_100km_chunks.zarr"
+frequency: "M"
+skipdates:
+input_dir: "/work/scratch-pw5/mattjbr/input/gear-hrly"
+filename: "CEH-GEAR-1hr-v2_{start_date}.nc"
+varnames:
+  - "rainfall_amount"
+  - "stat_disag"
+  - "min_dist"
+date_format: "%Y%m"
+target_root: "/work/scratch-pw5/mattjbr/output"
+store_name: "gearhrly_10km_chunks.zarr"
+concatdim: "time"
+concatvar: "time"
 target_chunks: 
-  time: 360
-  y: 100 
-  x: 100 
-  bnds: 2
-num_workers: 1
-prune: 0 # no. of files to process, set to 0 to use all
+  time: 236688
+  y: 10
+  x: 10 
+num_workers: 16
+prune: 25 # no. of files to process, set to 0 to use all
+overwrites: "off"
+var_overwrites:
+overwrite_source:
