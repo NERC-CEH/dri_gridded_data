@@ -1,5 +1,5 @@
-start_year: 1990
-end_year: 2016
+start_year: {startyear}
+end_year: {endyear}
 start_month: 1
 end_month: 12
 frequency: "M"
@@ -12,15 +12,15 @@ varnames:
   - "min_dist"
 date_format: "%Y%m"
 target_root: "/work/scratch-pw5/mattjbr/output"
-store_name: "gearhrly_10km_chunks.zarr"
+store_name: "gearhrly_10km_chunks_{startyear}.zarr"
 concatdim: "time"
 concatvar: "time"
 target_chunks: 
-  time: 236688
+  time: 8784
   y: 10
   x: 10 
-num_workers: 16
-prune: 25 # no. of files to process, set to 0 to use all
+num_workers: 1
+prune: 0 # no. of files to process, set to 0 to use all
 overwrites: "off"
 var_overwrites:
 overwrite_source:
