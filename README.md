@@ -1,5 +1,5 @@
 # Datasets
-This repository contains scripts for converting the following datasets, downloadable from the EIDC:
+This repository contains config for converting the following datasets, downloadable from the EIDC:
 - [CHESS-met, E.L. Robinson, E.M. Blyth et al.](https://doi.org/10.5285/835a50df-e74f-4bfb-b593-804fd61d5eab)
 - [GEAR(hourly), E. Lewis, N. Quinn et al. ](https://doi.org/10.5285/fc9423d6-3d54-467f-bb2b-fc7357a3941f)
 - [GEAR(daily), M. Tanguy, H. Dixon et al.](https://doi.org/10.5285/dbf13dd5-90cd-457a-a986-f2f9dd97e93c)
@@ -12,7 +12,7 @@ DRI Gridded Data Repository. Work in progress. The idea with this repo is to dev
 
 The first product that we are developing is to allow for easy conversion of various gridded datasets to [ARCO](https://ieeexplore.ieee.org/abstract/document/9354557) ([Zarr](https://zarr.readthedocs.io/en/stable/)) format and easy upload to [object storage](https://github.com/NERC-CEH/object_store_tutorial?tab=readme-ov-file#what-is-object-storage). This product is built upon [pangeo-forge-recipes](https://pangeo-forge.readthedocs.io/en/latest/) which provides convenience functions for [Apache Beam](https://beam.apache.org/), which handles all the complexity of the performant parallelisation needed for rapid execution of the conversion. For more information on the reasons and motivation for converting data to ARCO format see the [README](https://github.com/NERC-CEH/object_store_tutorial) of the repository that generated the idea for this product. 
 
-Currently the product has been designed for datasets stored in monthly netcdf files. The monthly file-frequency restriction is intended to be relaxed in future versions. 
+Currently the product has been designed for datasets stored in monthly or daily netcdf files. This file-frequency restriction is intended to be relaxed in future versions. 
 
 # Developer information
 
@@ -28,12 +28,12 @@ uv venv
 ```
 All scripts should now be runnable using `uv run` e.g.:
 ```
-uv run scripts/convert.py <datasetname> <CONFIG_FILE.yaml>
+uv run scripts/convert.py <CONFIG_FILE.yaml>
 ```
 
 ```datasetname``` can currently be one of "chess", "gearh" or "wrf". 
 
-> Note: Memory usage can be an issue for datasets >=O(100GB), due to the usage of Beam's rough-and-ready 'Direct Runner', which is not designed for operational use. Usage of an HPC is recommended for such datasets.
+> Note: Memory usage can be an issue for datasets >=O(100GB), due to the usage of Beam's rough-and-ready 'Direct Runner', which is not designed for operational use. Usage of an HPC is recommended for such datasets, example sbatch files for SLURM systems are included.
 
 ## Config
 
@@ -47,12 +47,11 @@ Example config files can be found in the "config" folder and contain the followi
 -  `input_dir`: The path to the directory/folder containing the dataset files
 -  `filename`: A template for the filenames of the files, containing {varname} to substitute for varnames, {start_date} for a timestamp and optionally {end_date} for a second timestamp (e.g. if there is a range in the filename)
 -  `filetype`: Optional. Type of netcdf files input. Only needed if the files are not netcdf4 (most now are), in which case use "netcdf3"
--  `varnames`: A list of all the variable names in the dataset. Currently the variable names in the filenames have to be the same as the variable names in the netcdf files.
+-  `varnames`: A list of all the variable names in the dataset. Currently the variable names in the filenames have to be the same as the variable names in the netcdf files if {varname} is used in `filename`
 -  `date_format`: A [python datestring format code](https://docs.python.org/3/library/datetime.html#format-codes) that represents the format of {start_date} (and {end_date} if present) in the filename 
 -  `target_root`: The path to the folder in which to store the output zarr dataset
 -  `store_name`: The name of the output zarr dataset
--  `concatdim`: The name of the dimension that the individual files will be concatenated along. Usually "time". Note this is separate to the merging of variables stored in separate files, wh
-ich is handled by varnames
+-  `concatdim`: The name of the dimension that the individual files will be concatenated along. Usually "time". Note this is separate to the merging of variables stored in separate files, which is handled by varnames
 -  `target_chunks`: A dictionary with the dimension names of the desired output dataset chunking as the keys and size of these dimensions as the values
 -  `num_workers`: Number of workers to use in the computation of the new dataset. Note that anything above 1 is currently experimental and may fail for weird reasons
 -  `prune`: Used for testing. Instead of running with all the dataset's files, just use the first X
