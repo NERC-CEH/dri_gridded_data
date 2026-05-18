@@ -47,7 +47,11 @@ def create_time_list(
                           start_date.hour, start_date.minute, start_date.second)
     times = []
     while current <= end_date:
-        if freq == 'M':
+        if freq == 'Y':
+            start_of_period = current.replace(month=1, day=1, hour=0, minute=0, second=0)            
+            next_start = start_of_period.replace(year = start_of_period.year + 1)
+            end_of_period = next_start - dt.timedelta(days=1)        
+        elif freq == 'M':
             start_of_period = current.replace(day=1, hour=0, minute=0, second=0)            
             next_start = get_next_month(current)
             end_of_period = next_start - dt.timedelta(days=1)
@@ -55,6 +59,9 @@ def create_time_list(
             start_of_period = current.replace(hour=0, minute=0, second=0)
             next_start = current + dt.timedelta(days=1)
             end_of_period = next_start - dt.timedelta(hours=1)
+        else:
+            raise TypeError(freq + " file frequency not supported, must be one of ['Y', 'M', 'D']")
+        
         if "{end_date}" in time_pattern:
             time_string = time_pattern.format(
                 start_date=start_of_period.strftime(date_format),
