@@ -46,7 +46,7 @@ Example config files can be found in the "config" folder and contain the followi
 -  `skipdates`: Optional. A list of dates to skip and not include in the conversion. Files with the listed dates (YYYY, YYYY-MM or YYYY-MM-DD) will be skipped.
 -  `input_dir`: The path to the directory/folder containing the dataset files
 -  `filename`: A template for the filenames of the files, containing {varname} to substitute for varnames, {start_date} for a timestamp and optionally {end_date} for a second timestamp (e.g. if there is a range in the filename)
--  `filetype`: Optional. Type of netcdf files input. Only needed if the files are not netcdf4 (most now are), in which case use "netcdf3"
+-  `file_type`: Optional. Type of netcdf files input. Only needed if the files are not netcdf4 (most now are), in which case use "netcdf3"
 -  `varnames`: A list of all the variable names in the dataset. Currently the variable names in the filenames have to be the same as the variable names in the netcdf files if {varname} is used in `filename`
 -  `date_format`: A [python datestring format code](https://docs.python.org/3/library/datetime.html#format-codes) that represents the format of {start_date} (and {end_date} if present) in the filename 
 -  `target_root`: The path to the folder in which to store the output zarr dataset
