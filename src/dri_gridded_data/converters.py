@@ -24,6 +24,7 @@ from pangeo_forge_recipes.transforms import (
 from pangeo_forge_recipes.types import Indexed
 from dri_gridded_data.utils import Config
 
+logging.basicConfig(level=logging.DEBUG)
 
 # helper functions
 def get_next_month(date: dt.datetime) -> dt.datetime:
