@@ -1,8 +1,10 @@
 # Datasets
-This repository contains config for converting the following datasets, downloadable from the EIDC:
+This repository contains config for converting the following datasets from, Netcdf to Zarr, downloadable from the EIDC:
 - [CHESS-met, E.L. Robinson, E.M. Blyth et al.](https://doi.org/10.5285/835a50df-e74f-4bfb-b593-804fd61d5eab)
 - [GEAR(hourly), E. Lewis, N. Quinn et al. ](https://doi.org/10.5285/fc9423d6-3d54-467f-bb2b-fc7357a3941f)
 - [GEAR(daily), M. Tanguy, H. Dixon et al.](https://doi.org/10.5285/dbf13dd5-90cd-457a-a986-f2f9dd97e93c)
+
+Following the below instructions, it can be configured for any Netcdf dataset.
 
 # DRI Gridded Data
 
@@ -12,7 +14,7 @@ DRI Gridded Data Repository. Work in progress. The idea with this repo is to dev
 
 The first product that we are developing is to allow for easy conversion of various gridded datasets to [ARCO](https://ieeexplore.ieee.org/abstract/document/9354557) ([Zarr](https://zarr.readthedocs.io/en/stable/)) format and easy upload to [object storage](https://github.com/NERC-CEH/object_store_tutorial?tab=readme-ov-file#what-is-object-storage). This product is built upon [pangeo-forge-recipes](https://pangeo-forge.readthedocs.io/en/latest/) which provides convenience functions for [Apache Beam](https://beam.apache.org/), which handles all the complexity of the performant parallelisation needed for rapid execution of the conversion. For more information on the reasons and motivation for converting data to ARCO format see the [README](https://github.com/NERC-CEH/object_store_tutorial) of the repository that generated the idea for this product. 
 
-Currently the product has been designed for datasets stored in monthly or daily netcdf files. This file-frequency restriction is intended to be relaxed in future versions. 
+The second is a [series of notebooks](https://github.com/NERC-CEH/fdri-gridded-notebooks/blob/main/README.md) that show how to access and work with datasets stored in this way in the cloud quickly and easily. 
 
 # Developer information
 
