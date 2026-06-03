@@ -24,8 +24,6 @@ from pangeo_forge_recipes.transforms import (
 from pangeo_forge_recipes.types import Indexed
 from dri_gridded_data.utils import Config
 
-logging.basicConfig(level=logging.DEBUG)
-
 # helper functions
 def get_next_month(date: dt.datetime) -> dt.datetime:
     if date.month == 12:
@@ -312,25 +310,48 @@ def converter(config: Config):
     if not os.path.exists(config.target_root):
         os.makedirs(config.target_root)
 
-    ## TODO: Got to be a better way of doing matching the config arg to the function arg name...
+    ## TODO: Got to be a better way of matching the time config arg to the function arg name...
     if config.concatdim == "Time":
-        def make_path(Time):
-            filename = config.filename
-            filename = re.sub(r"{start_date}.*{end_date}", "{time}", filename)
-            filename = re.sub(r"{start_date}", "{time}", filename)
-            filename = re.sub(r"{time}", Time, filename)
-            
-            print(f"FILENAME: {filename}")
-            return os.path.join(config.input_dir, filename)
+        if "{variable}" in config.filename:
+            def make_path(variable, Time):
+                filename = config.filename
+                filename = re.sub(r"{start_date}.*{end_date}", "{time}", filename)
+                filename = re.sub(r"{start_date}", "{time}", filename)
+                filename = re.sub(r"{time}", Time, filename)
+                filename = re.sub(r"{variable}", variable, filename)
+                
+                print(f"FILENAME: {filename}")
+                return os.path.join(config.input_dir, filename)
+        else:
+            def make_path(Time):
+                filename = config.filename
+                filename = re.sub(r"{start_date}.*{end_date}", "{time}", filename)
+                filename = re.sub(r"{start_date}", "{time}", filename)
+                filename = re.sub(r"{time}", Time, filename)
+                
+                print(f"FILENAME: {filename}")
+                return os.path.join(config.input_dir, filename)
     elif config.concatdim == 'time':
-        def make_path(time):
-            filename = config.filename
-            filename = re.sub(r"{start_date}.*{end_date}", "{time}", filename)
-            filename = re.sub(r"{start_date}", "{time}", filename)
-            filename = re.sub(r"{time}", time, filename)
-            
-            print(f"FILENAME: {filename}")
-            return os.path.join(config.input_dir, filename)
+        if "{variable}" in config.filename:
+            def make_path(variable, time):
+                filename = config.filename
+                filename = re.sub(r"{start_date}.*{end_date}", "{time}", filename)
+                filename = re.sub(r"{start_date}", "{time}", filename)
+                filename = re.sub(r"{time}", time, filename)
+                filename = re.sub(r"{variable}", variable, filename)
+                
+                print(f"FILENAME: {filename}")
+                return os.path.join(config.input_dir, filename)
+
+        else:
+            def make_path(time):
+                filename = config.filename
+                filename = re.sub(r"{start_date}.*{end_date}", "{time}", filename)
+                filename = re.sub(r"{start_date}", "{time}", filename)
+                filename = re.sub(r"{time}", time, filename)
+                
+                print(f"FILENAME: {filename}")
+                return os.path.join(config.input_dir, filename)
     else:
         raise TypeError("concatdim other than Time or time is not supported")
 
@@ -353,7 +374,12 @@ def converter(config: Config):
 
     time_concat_dim = ConcatDim(config.concatdim, times)
 
-    pattern = FilePattern(make_path, time_concat_dim, file_type=config.file_type)
+    if "{varname}" in config.filename:
+        variable_merge_dim = MergeDim("variable", config.varnames)
+        pattern = FilePattern(make_path, variable_merge_dim, time_concat_dim, file_type=config.file_type)
+    else:
+        pattern = FilePattern(make_path, time_concat_dim, file_type=config.file_type)
+        
     if config.prune > 0:
         pattern = pattern.prune(nkeep=config.prune)
 
