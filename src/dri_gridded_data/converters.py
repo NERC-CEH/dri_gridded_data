@@ -312,13 +312,13 @@ def converter(config: Config):
 
     ## TODO: Got to be a better way of matching the time config arg to the function arg name...
     if config.concatdim == "Time":
-        if "{variable}" in config.filename:
+        if "{varname}" in config.filename:
             def make_path(variable, Time):
                 filename = config.filename
                 filename = re.sub(r"{start_date}.*{end_date}", "{time}", filename)
                 filename = re.sub(r"{start_date}", "{time}", filename)
                 filename = re.sub(r"{time}", Time, filename)
-                filename = re.sub(r"{variable}", variable, filename)
+                filename = re.sub(r"{varname}", variable, filename)
                 
                 print(f"FILENAME: {filename}")
                 return os.path.join(config.input_dir, filename)
@@ -332,13 +332,13 @@ def converter(config: Config):
                 print(f"FILENAME: {filename}")
                 return os.path.join(config.input_dir, filename)
     elif config.concatdim == 'time':
-        if "{variable}" in config.filename:
+        if "{varname}" in config.filename:
             def make_path(variable, time):
                 filename = config.filename
                 filename = re.sub(r"{start_date}.*{end_date}", "{time}", filename)
                 filename = re.sub(r"{start_date}", "{time}", filename)
                 filename = re.sub(r"{time}", time, filename)
-                filename = re.sub(r"{variable}", variable, filename)
+                filename = re.sub(r"{varname}", variable, filename)
                 
                 print(f"FILENAME: {filename}")
                 return os.path.join(config.input_dir, filename)
