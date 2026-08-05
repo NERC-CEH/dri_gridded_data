@@ -396,9 +396,14 @@ def converter(config: Config):
                     "File to be used for overwriting " + owfile + " does not exist"
                 )
         else:
-            owfile = make_path(config.varnames[-1], times[-1])
+            if "{varname}" in config.filename:
+                owfile = make_path(config.varnames[-1], times[-1])
+            else:
+                owfile = make_path(times[-1])
+                
             try:
                 owds = xr.open_dataset(owfile)
+                owds.close()
             except FileNotFoundError:
                 raise FileNotFoundError(
                     "File to be used for overwriting "
