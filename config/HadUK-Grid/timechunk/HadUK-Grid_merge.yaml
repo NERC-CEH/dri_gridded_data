@@ -1,0 +1,25 @@
+start_year: 1891
+end_year: 2024
+start_month: 1
+end_month: 12
+frequency: "Y"
+skipdates:
+input_dir: "/work/scratch-pw5/mattjbr/output"
+filename: "hadukgrid_rainfall_week_chunks_{start_date}.zarr"
+file_type: "zarr"
+varnames:
+  - "rainfall"
+date_format: "%Y"
+target_root: "/work/scratch-pw5/mattjbr/output"
+store_name: "hadukgrid_rainfall_week_chunks_all.zarr"
+concatdim: "time"
+concatvar: "time"
+target_chunks: 
+  time: 7
+  projection_y_coordinate: 1450
+  projection_x_coordinate: 900
+num_workers: 1
+prune: 0 # no. of files to process, set to 0 to use all
+overwrites: "off"
+var_overwrites:
+overwrite_source:

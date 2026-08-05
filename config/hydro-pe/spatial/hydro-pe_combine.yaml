@@ -1,0 +1,28 @@
+start_year: 1969
+end_year: 2024
+start_month: 1
+end_month: 12
+frequency: "Y"
+skipdates:
+input_dir: "/work/scratch-pw5/mattjbr/output"
+filename: "hydro-pe_10km_chunks_{start_date}.zarr"
+file_type: "zarr"
+varnames:
+  - "pet"
+  - "peti"
+date_format: "%Y"
+target_root: "/work/scratch-pw5/mattjbr/output"
+store_name: "hydro-pe_10km_chunks_all.zarr"
+concatdim: "time"
+concatvar: "time"
+target_chunks: 
+  time: 20500
+  y: 10
+  x: 10 
+num_workers: 1
+prune: 0 # no. of files to process, set to 0 to use all
+overwrites: "on"
+var_overwrites:
+  - "lon"
+  - "lat"
+overwrite_source:

@@ -1,0 +1,27 @@
+start_year: 1969
+end_year: 2024
+start_month: 1
+end_month: 12
+frequency: "M"
+skipdates:
+input_dir: "/work/scratch-pw5/mattjbr/input/hydro-pe"
+filename: "hydro-pe_hadukgrid_{varname}_1km_day_{start_date}-{end_date}.nc"
+varnames:
+  - "pet"
+  - "peti"
+date_format: "%Y%m%d"
+target_root: "/work/scratch-pw5/mattjbr/output"
+store_name: "hydro-pe_week_chunks.zarr"
+concatdim: "time"
+concatvar: "time"
+target_chunks: 
+  time: 7
+  y: 1450
+  x: 900
+num_workers: 1
+prune: 0 # no. of files to process, set to 0 to use all
+overwrites: "on"
+var_overwrites:
+  - "lat"
+  - "lon"
+overwrite_source:

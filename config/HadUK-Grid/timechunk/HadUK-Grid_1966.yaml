@@ -1,0 +1,24 @@
+start_year: 1966
+end_year: 1966
+start_month: 1
+end_month: 12
+frequency: "M"
+skipdates:
+input_dir: "/gws/ssde/j25b/fdri/data/HadUK-Grid-rainfall/v1.3.1"
+filename: "rainfall_hadukgrid_uk_1km_day_{start_date}-{end_date}.nc"
+varnames:
+  - "rainfall"
+date_format: "%Y%m%d"
+target_root: "/work/scratch-pw5/mattjbr/output"
+store_name: "hadukgrid_rainfall_week_chunks_1966.zarr"
+concatdim: "time"
+concatvar: "time"
+target_chunks: 
+  time: 7
+  projection_y_coordinate: 1450
+  projection_x_coordinate: 900
+num_workers: 1
+prune: 0 # no. of files to process, set to 0 to use all
+overwrites: "off"
+var_overwrites:
+overwrite_source:

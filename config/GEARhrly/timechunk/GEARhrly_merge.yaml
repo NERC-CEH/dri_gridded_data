@@ -1,0 +1,27 @@
+start_year: 1990
+end_year: 2016
+start_month: 1
+end_month: 12
+frequency: "Y"
+skipdates:
+input_dir: "/work/scratch-pw5/mattjbr/output"
+filename: "gearhrly_daily_chunks_{start_date}.zarr"
+file_type: "zarr"
+varnames:
+  - "rainfall_amount"
+  - "stat_disag"
+  - "min_dist"
+date_format: "%Y"
+target_root: "/work/scratch-pw5/mattjbr/output"
+store_name: "gearhrly_daily_chunks_all.zarr"
+concatdim: "time"
+concatvar: "time"
+target_chunks: 
+  time: 24
+  y: 1251
+  x: 701
+num_workers: 1
+prune: 0 # no. of files to process, set to 0 to use all
+overwrites: "off"
+var_overwrites:
+overwrite_source:
