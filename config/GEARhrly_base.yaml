@@ -4,6 +4,7 @@ start_month: 1
 end_month: 12
 frequency: "M"
 skipdates:
+calendar: "standard"
 input_dir: "/work/scratch-pw5/mattjbr/input/gear-hrly"
 filename: "CEH-GEAR-1hr-v2_{start_date}.nc"
 varnames:

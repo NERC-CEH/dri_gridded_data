@@ -21,6 +21,7 @@ class Config:
     start_year: int
     end_year: int
     skipdates: list
+    calendar: str
     target_chunks: Dict[str, int]
     concatdim: Optional[str] = "time"
     concatvar: Optional[str] = 'time'

@@ -11,6 +11,7 @@ import logging
 import re
 import xarray as xr
 import datetime as dt
+import cftime as cft
 import apache_beam as beam
 from pangeo_forge_recipes.patterns import ConcatDim, MergeDim, FilePattern
 from apache_beam.options.pipeline_options import PipelineOptions
@@ -25,27 +26,33 @@ from pangeo_forge_recipes.types import Indexed
 from dri_gridded_data.utils import Config
 
 # helper functions
-def get_next_month(date: dt.datetime) -> dt.datetime:
+def get_next_month(date: cft.datetime) -> cft.datetime:
     if date.month == 12:
         return date.replace(year=date.year + 1, month=1, day=1)
     else:
         return date.replace(month=date.month + 1, day=1)
     
-def get_last_of_month(date: dt.datetime) -> dt.datetime:
+def get_last_of_month(date: cft.datetime) -> cft.datetime:
     next_month = get_next_month(date)
     return next_month - dt.timedelta(days=next_month.day)
 
 def create_time_list(
-    start_date: dt.datetime,
-    end_date: dt.datetime,
+    start_date: cft.datetime,
+    end_date: cft.datetime,
     time_pattern: str,
+    calendar: str,    
     date_format: str,
     skipdates: list[str],
     freq: str) -> list[str]:
-    current = dt.datetime(start_date.year, start_date.month, start_date.day,
-                          start_date.hour, start_date.minute, start_date.second)
+    current = cft.datetime(start_date.year, start_date.month, start_date.day,
+                           start_date.hour, start_date.minute, start_date.second,
+                           calendar=calendar)
     times = []
     while current <= end_date:
+        if freq == 'Decade':
+            start_of_period = current.replace(day=1, hour=0, minute=0, second=0)
+            next_start = start_of_period.replace(year = start_of_period.year + 10)
+            end_of_period = next_start - dt.timedelta(days=1)
         if freq == 'Y':
             start_of_period = current.replace(month=1, day=1, hour=0, minute=0, second=0)            
             next_start = start_of_period.replace(year = start_of_period.year + 1)
@@ -59,7 +66,7 @@ def create_time_list(
             next_start = current + dt.timedelta(days=1)
             end_of_period = next_start - dt.timedelta(hours=1)
         else:
-            raise TypeError(freq + " file frequency not supported, must be one of ['Y', 'M', 'D']")
+            raise TypeError(freq + " file frequency not supported, must be one of ['Decade', 'Y', 'M', 'D']")
         
         if "{end_date}" in time_pattern:
             time_string = time_pattern.format(
@@ -359,14 +366,15 @@ def converter(config: Config):
         time_pattern = re.search(r"{start_date}.*{end_date}", config.filename).group()
     else:
         time_pattern = "{start_date}"    
-    start = dt.datetime(year=config.start_year, month=config.start_month, day=1,
-                        hour=0, second=0)
-    end = dt.datetime(year=config.end_year, month=config.end_month, 
-                      day=get_last_of_month(dt.datetime(year=config.end_year, 
+    start = cft.datetime(year=config.start_year, month=config.start_month, day=1,
+                        hour=0, second=0, calendar=config.calendar)
+    end = cft.datetime(year=config.end_year, month=config.end_month, 
+                      day=get_last_of_month(cft.datetime(year=config.end_year, 
                                                         month=config.end_month, 
                                                         day=1)).day,
-                      hour=23, minute=59, second=59)
+                      hour=23, minute=59, second=59, calendar=config.calendar)
     times = create_time_list(start, end, time_pattern, 
+                             calendar=config.calendar,
                              date_format=config.date_format,
                              skipdates=config.skipdates,
                              freq=config.frequency)

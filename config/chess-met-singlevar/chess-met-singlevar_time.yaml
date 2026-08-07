@@ -1,28 +1,25 @@
-start_year: {year}
-end_year: {year}
+start_year: 1980
+end_year: 2019
 start_month: 1
 end_month: 12
 frequency: "M"
 skipdates:
 calendar: "standard"
-input_dir: "/work/scratch-pw5/mattjbr/input/hydro-pe"
-filename: "hydro-pe_hadukgrid_{varname}_1km_day_{start_date}-{end_date}.nc"
+input_dir: "/gws/ssde/j25b/fdri/data/chess-met/netsolar"
+filename: "chess-met_netsolar_gb_1km_daily_{start_date}-{end_date}.nc"
 varnames:
-  - "pet"
-  - "peti"
+  - "netsolar"
 date_format: "%Y%m%d"
 target_root: "/work/scratch-pw5/mattjbr/output"
-store_name: "hydro-pe_10km_chunks_{year}.zarr"
+store_name: "chess-met-netsolar_month_chunks.zarr"
 concatdim: "time"
 concatvar: "time"
 target_chunks: 
-  time: 19764
-  y: 10
-  x: 10 
+  time: 30
+  y: 1057
+  x: 656
 num_workers: 1
 prune: 0 # no. of files to process, set to 0 to use all
-overwrites: "on"
+overwrites: "off"
 var_overwrites:
-  - "lon"
-  - "lat"
 overwrite_source:

@@ -1,0 +1,25 @@
+start_year: 1980
+end_year: 2080
+start_month: 12
+end_month: 11
+frequency: "Decade"
+skipdates:
+calendar: "360_day"
+input_dir: "/badc/ukcp18/data/land-cpm/uk/5km/rcp85/01/rss/day/latest"
+filename: "rss_rcp85_land-cpm_uk_5km_01_day_19801201-19901130.nc"
+varnames:
+  - "rss"
+date_format: "%Y%m%d"
+target_root: "/work/scratch-pw5/mattjbr/output"
+store_name: "ukcp18-cpm_rss01_month_chunks.zarr"
+concatdim: "time"
+concatvar: "time"
+target_chunks: 
+  time: 30
+  y: 244
+  x: 180
+num_workers: 1
+prune: 0 # no. of files to process, set to 0 to use all
+overwrites: "off"
+var_overwrites:
+overwrite_source:

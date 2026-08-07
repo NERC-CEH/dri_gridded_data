@@ -4,6 +4,7 @@ start_month: 1
 end_month: 12
 frequency: "M"
 skipdates:
+calendar: "standard"
 input_dir: "/work/scratch-pw5/mattjbr/input/hydro-pe"
 filename: "hydro-pe_hadukgrid_{varname}_1km_day_{start_date}-{end_date}.nc"
 varnames:

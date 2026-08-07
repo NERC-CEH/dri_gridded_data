@@ -4,6 +4,7 @@ start_month: 1
 end_month: 12
 frequency: "Y"
 skipdates:
+calendar: "standard"
 input_dir: "/work/scratch-pw5/mattjbr/output"
 filename: "hydro-pe_10km_chunks_{start_date}.zarr"
 file_type: "zarr"

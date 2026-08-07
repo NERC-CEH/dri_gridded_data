@@ -52,6 +52,7 @@ skipdates: # skip files the following dates in their filenames, YYYY-MM-DD
   - "2017"
   - "2018"
   - "2019"
+calendar: "standard"
 input_dir: "/work/scratch-pw5/mattjbr"
 filename: "wrfout_d03_{start_date}"
 file_type: "netcdf3" # only needed if the files are not netcdf4 (most now are)
