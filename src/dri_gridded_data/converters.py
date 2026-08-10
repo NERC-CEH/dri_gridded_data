@@ -53,7 +53,7 @@ def create_time_list(
             start_of_period = current.replace(day=1, hour=0, minute=0, second=0)
             next_start = start_of_period.replace(year = start_of_period.year + 10)
             end_of_period = next_start - dt.timedelta(days=1)
-        if freq == 'Y':
+        elif freq == 'Y':
             start_of_period = current.replace(month=1, day=1, hour=0, minute=0, second=0)            
             next_start = start_of_period.replace(year = start_of_period.year + 1)
             end_of_period = next_start - dt.timedelta(days=1)        
